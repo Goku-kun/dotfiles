@@ -1,0 +1,18 @@
+{
+    "coc.preferences.bracketEnterImprove": true,
+    "coc.preferences.colorSupport": true,
+    "coc.preferences.formatOnSaveFiletypes": [
+        "css",
+        "python",
+        "javascript",
+        "html",
+        "json",
+        "typescript"
+    ],
+    "coc.preferences.extensionUpdateCheck": "weekly",
+    "prettier.tabWidth": 4,
+    "prettier.trailingComma": "es5",
+    "python.linting.pylintEnabled": true,
+    "html.enable": true,
+    "css.lint.float": "warning"
+}
