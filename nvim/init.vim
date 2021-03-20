@@ -51,19 +51,12 @@ Plug 'sainnhe/edge'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'pangloss/vim-javascript'
+Plug 'tommcdo/vim-lion'
+Plug 'yuttie/comfortable-motion.vim'
 "Plug 'sheerun/vim-polyglot'
 call plug#end()
 
 
-" Enabling rainbow mode parenths, square braces & curly braces
-augroup rainbow_lisp
-      autocmd!
-      autocmd FileType lisp,clojure,scheme RainbowParentheses
-augroup END
-
-augroup rainbow_group
-    au! VimEnter * nested RainbowParentheses
-augroup end
 
 let g:rainbow#max_level = 16
 let g:rainbow#pairs = [['(', ')'], ['[', ']'], ['{', '}']]
@@ -89,6 +82,15 @@ let g:airline_theme = 'edge'
 hi Visual  guifg=#EFD469 guibg=#373D3F gui=none
 hi Visual cterm=NONE ctermfg=yellow ctermbg=red
 
+" Enabling rainbow mode parenths, square braces & curly braces
+augroup rainbow_lisp
+      autocmd!
+      autocmd FileType lisp,clojure,scheme,javascript,python,c RainbowParentheses
+augroup END
+
+augroup rainbow_group
+    au! VimEnter * nested RainbowParentheses
+augroup end
 
 " Setting up a new command called Prettier.
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
