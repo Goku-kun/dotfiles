@@ -1,4 +1,5 @@
 {
+    "prettier.bracketSpacing": true,
     "coc.preferences.bracketEnterImprove": true,
     "coc.preferences.colorSupport": true,
     "coc.preferences.formatOnSaveFiletypes": [
@@ -9,10 +10,40 @@
         "json",
         "typescript"
     ],
-    "coc.preferences.extensionUpdateCheck": "weekly",
-    "prettier.tabWidth": 4,
-    "prettier.trailingComma": "es5",
+    "emmet.showExpandedAbbreviation": "always",
+    "emmet.includeLanguages": { "javascript": "javascriptreact" },
+    "javascript.suggest.autoImports": true,
     "python.linting.pylintEnabled": true,
+    "prettier.tabWidth": 4,
+    "prettier.singleQuote": false,
+    "prettier.trailingComma": "es5",
+    "prettier.semi": true,
     "html.enable": true,
-    "css.lint.float": "warning"
+    "css.lint.float": "warning",
+    "coc.preferences.extensionUpdateCheck": "weekly",
+    "rome.enable": true,
+    "yank.enableCompletion": false,
+    "python.pythonPath": "python3",
+    "jedi.enable": true,
+    "jedi.startupMessage": false,
+    "jedi.markupKindPreferred": "plaintext",
+    "jedi.trace.server": "off",
+    "jedi.jediSettings.autoImportModules": [],
+    "jedi.executable.command": "jedi-language-server",
+    "jedi.executable.args": [],
+    "jedi.completion.disableSnippets": false,
+    "jedi.completion.resolveEagerly": false,
+    "jedi.diagnostics.enable": true,
+    "jedi.diagnostics.didOpen": true,
+    "jedi.diagnostics.didChange": true,
+    "jedi.diagnostics.didSave": true,
+    "jedi.workspace.extraPaths": [],
+    "jedi.workspace.symbols.maxSymbols": 20,
+    "jedi.workspace.symbols.ignoreFolders": [
+        ".nox",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "venv"
+    ]
 }

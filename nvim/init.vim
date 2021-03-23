@@ -20,8 +20,8 @@ set iskeyword-=_ "removing _ from words to consider words with _ as two differen
 "set ga  setting g flag by default for substitute"
 "set nocompatible " option requirement for vim polyglot
 filetype plugin on
-set tw=110 "line length above which to break a line in insert mode"
-
+set tw=150 "line length above which to break a line in insert mode"
+set nowrap
 
 " setting the leader key to space
 let mapleader = " "
@@ -53,6 +53,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'pangloss/vim-javascript'
 Plug 'tommcdo/vim-lion'
 Plug 'yuttie/comfortable-motion.vim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 "Plug 'sheerun/vim-polyglot'
 call plug#end()
 
@@ -91,6 +92,7 @@ augroup END
 augroup rainbow_group
     au! VimEnter * nested RainbowParentheses
 augroup end
+
 
 " Setting up a new command called Prettier.
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
