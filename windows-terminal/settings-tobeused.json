@@ -1,0 +1,89 @@
+{
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "defaultProfile": "{46ca431a-3a87-5fb3-83cd-11ececc031d2}",
+    "startOnUserLogin": true,
+    "launchMode": "fullscreen",
+    "rowsToScroll": "system",
+    "copyOnSelect": false,
+    "copyFormatting": false,
+    "profiles": {
+        "defaults": {},
+        "list": [
+            {
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "name": "Windows PowerShell",
+                "commandline": "powershell.exe",
+                "backgroundImage": "C://Users/jethva/pictures/gojo.png",
+                "fontFace": "Fira Code",
+                "hidden": false
+            },
+            {
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "name": "Command Prompt",
+                "commandline": "cmd.exe",
+                "backgroundImage": "C:/Users/jethv/Pictures/gojo.png",
+                "backgroundImageOpacity": 0.1,
+                "fontFace": "Fira Code",
+                "hidden": false
+            },
+            {
+                "guid": "{46ca431a-3a87-5fb3-83cd-11ececc031d2}",
+                "hidden": false,
+                "name": "kali-linux",
+                "cursorShape": "filledBox",
+                "fontFace": "Fira Code",
+                "bellStyle": "none",
+                "backgroundImage": "/mnt/c/Users/jethv/Pictures/Anime/Screenshot (65).png",
+                "backgroundImageOpacity": 0.1,
+                "source": "Windows.Terminal.Wsl"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure",
+                "fontFace": "Fira Code"
+            }
+        ]
+    },
+    "schemes": [
+        {
+            "name": "Frost",
+            "background": "#FFFFFF",
+            "black": "#3C5712",
+            "blue": "#17b2ff",
+            "brightBlack": "#749B36",
+            "brightBlue": "#27B2F6",
+            "brightCyan": "#13A8C0",
+            "brightGreen": "#89AF50",
+            "brightPurple": "#F2A20A",
+            "brightRed": "#F49B36",
+            "brightWhite": "#741274",
+            "brightYellow": "#991070",
+            "cyan": "#3C96A6",
+            "foreground": "#000000",
+            "green": "#6AAE08",
+            "purple": "#991070",
+            "red": "#8D0C0C",
+            "white": "#6E386E",
+            "yellow": "#991070"
+        }
+    ],
+    "actions": [
+        {
+            "command": { "action": "copy", "singleLine": false },
+            "keys": "ctrl+c"
+        },
+        { "command": "paste", "keys": "ctrl+v" },
+        { "command": "find", "keys": "ctrl+shift+f" },
+        {
+            "command": {
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            },
+            "keys": "alt+shift+d"
+        }
+    ]
+}
+
