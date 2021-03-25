@@ -22,12 +22,21 @@ set iskeyword-=_ "removing _ from words to consider words with _ as two differen
 filetype plugin on
 set tw=150 "line length above which to break a line in insert mode"
 set nowrap
+set pyxversion=3
+"set guifont=Fira\ Code\ Nerd\ Font\ h20
+
+"Important to set these for python linter used by coc
+let g:python_host_prog = '/usr/bin/python'
+let g:python3_host_prog = '/usr/bin/python3'
+
+"let g:loaded_python_provider = 0
+"let g:loaded_python3_provider = 1
 
 " setting the leader key to space
 let mapleader = " "
 
 " open vertical explorer in normal mode
-nnoremap <leader>pv :Vex<CR>
+nnoremap <leader>pv :NERDTreeToggle<CR>
 
 " word wrap remap
 nnoremap <leader>wr :set wrap linebreak<CR>
@@ -54,13 +63,20 @@ Plug 'pangloss/vim-javascript'
 Plug 'tommcdo/vim-lion'
 Plug 'yuttie/comfortable-motion.vim'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'preservim/nerdtree' 
+"Plug 'ryanoasis/vim-devicons'
 "Plug 'sheerun/vim-polyglot'
 call plug#end()
 
+" Always install nerd tree after the major plugins
 
 
 let g:rainbow#max_level = 16
 let g:rainbow#pairs = [['(', ')'], ['[', ']'], ['{', '}']]
+
+" nerd tree expand and collapse icons
+let g:NERDTreeDirArrowExpandable = '▶'
+let g:NERDTreeDirArrowCollapsible = '🔽'
 
 
 " colorscheme definition
