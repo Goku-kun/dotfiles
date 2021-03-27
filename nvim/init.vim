@@ -11,12 +11,18 @@ set nohlsearch
 set incsearch
 set signcolumn=yes
 set backspace=indent,eol,start
+set undodir=~/.vim/undodir
+set noswapfile
+set nobackup
+set undofile
 set cul
 set sidescroll=15
 set list "to show the tab lines in the currentline"
 set listchars=tab:>-,trail:- "using arrow and dashes to represent tabs and trailing white spaces"
 set iskeyword+=- "adding  + from words to consider words with - as one single words"
 set iskeyword-=_ "removing _ from words to consider words with _ as two different words"
+"set colorcolumn=100
+"highlight colorcolumn guibg=red
 "set ga  setting g flag by default for substitute"
 "set nocompatible " option requirement for vim polyglot
 filetype plugin on
@@ -64,6 +70,9 @@ Plug 'tommcdo/vim-lion'
 Plug 'yuttie/comfortable-motion.vim'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'preservim/nerdtree' 
+Plug 'ThePrimeagen/vim-be-good'
+Plug 'mbbill/undotree'
+Plug 'tpope/vim-fugitive'
 "Plug 'ryanoasis/vim-devicons'
 "Plug 'sheerun/vim-polyglot'
 call plug#end()
@@ -87,8 +96,8 @@ let g:edge_style = 'neon'
 "let g:edge_enable_italic = 1
 let g:edge_disable_italic_comment = 1
 let g:edge_cursor = 'red'
+let g:edge_menu_selection_background='purple'
 let g:edge_transparent_background = 1 "to use the transparent background"
-let g:edge_current_word = 'grey background'
 colorscheme edge
 let g:rainbow_active = 1
 let g:airline_theme = 'edge'
@@ -159,3 +168,26 @@ nnoremap <C-l> <C-w><C-l>
 
 " Display buffers in the airline
 "let g:airline#extensions#tabline#enabled = 1
+
+
+" Undo tree remap: allows me to open with U and shift window focus to undotree split
+nnoremap U :UndotreeToggle<CR><C-w>h
+
+
+" Setting custom airline symbol
+if !exists('g:airline_symbols')
+let g:airline_symbols = {}
+endif
+
+
+
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = '☰'
+let g:airline_symbols.maxlinenr = ''
+let g:airline_symbols.dirty='⚡'
+
