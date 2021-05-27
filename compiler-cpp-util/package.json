@@ -1,0 +1,19 @@
+{
+    "name": "compilercpp",
+    "version": "1.0.0",
+    "description": "This modules compiles .cpp file and executes the generated output",
+    "main": "compilercpp.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "compiler",
+        "cpp",
+        "js"
+    ],
+    "bin": {
+        "compilercpp": "compilercpp.js"
+    },
+    "author": "Dharmarajsinh Jethva",
+    "license": "GPL-3.0-or-later"
+}
