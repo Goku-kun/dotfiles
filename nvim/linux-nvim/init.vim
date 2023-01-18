@@ -1,5 +1,4 @@
 syntax on
-set guicursor=
 set scrolloff=12
 set relativenumber
 set nu
@@ -26,7 +25,7 @@ set iskeyword-=_ "removing _ from words to consider words with _ as two differen
 "set ga  setting g flag by default for substitute"
 "set nocompatible " option requirement for vim polyglot
 filetype plugin on
-set tw=150 "line length above which to break a line in insert mode"
+set tw=150 "line length after which to break a line in insert mode"
 set nowrap
 set pyxversion=3
 "set guifont=Fira\ Code\ Nerd\ Font\ h20
@@ -63,8 +62,8 @@ Plug 'morhetz/gruvbox'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'preservim/nerdcommenter'
 Plug 'rafi/awesome-vim-colorschemes'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'tpope/vim-surround'
 Plug 'sainnhe/edge'
@@ -87,9 +86,17 @@ Plug 'thosakwe/vim-flutter'
 "Plug 'natebosch/vim-lsc-dart'
 "Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
+Plug 'Eandrju/cellular-automaton.nvim'
+Plug 'dense-analysis/ale'
 call plug#end()
 
 " Always install nerd tree after the major plugins
+
+" Keeping the sign column gutter open for Ale (remember to set the diagnostic.displayByAle in CocConfig)
+let g:ale_sign_column_always = 1
+let g:airline#extensions#ale#enabled = 1
+
+nnoremap <leader>ll :ALEPopulateQuickfix<CR>
 
 
 let g:rainbow#max_level = 16
@@ -98,6 +105,7 @@ let g:rainbow#pairs = [['(', ')'], ['[', ']'], ['{', '}']]
 " nerd tree expand and collapse icons
 let g:NERDTreeDirArrowExpandable = '▶'
 let g:NERDTreeDirArrowCollapsible = '🔽'
+let NERDTreeShowHidden = 1
 
 
 let g:edge_style = 'neon'
@@ -119,7 +127,7 @@ hi Visual cterm=NONE ctermfg=yellow ctermbg=red
 " Enabling rainbow mode parenths, square braces & curly braces
 augroup rainbow_lisp
       autocmd!
-      autocmd FileType lisp,clojure,scheme,javascript,python,c RainbowParentheses
+      autocmd FileType lisp,clojure,scheme,javascript,typescript,python,c RainbowParentheses
 augroup END
 
 augroup rainbow_group
@@ -129,6 +137,9 @@ augroup end
 
 " Setting up a new command called Prettier.
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
+let g:prettier#autoformat = 1
+let g:prettier#autoformat_require_pragma = 0
+
 
 " Prettier command remap to CTRL + f
 inoremap <C-f> <esc>:Prettier<CR>a
@@ -146,10 +157,12 @@ nnoremap \c bi{<Esc>ea}<Esc>
 
 
 
-" Fuzzy finder remaps for fzf
+" Fuzzy finder remaps for telescope
 
-nnoremap <C-p> :GFiles<CR>
-nnoremap <leader>ff :Files<CR>
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 
 function! s:check_back_space() abort
@@ -169,13 +182,17 @@ inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR
 
 " remap for moving across the open splits without pressing CTRL-w each time
 nnoremap <C-h> <C-w><C-h>
-nnoremap <C-j> <C-w><C-j>
-nnoremap <C-k> <C-w><C-k>
 nnoremap <C-l> <C-w><C-l>
 
 
+" navigate through the quick fix lists
+nnoremap <C-j> :cnext<CR>
+nnoremap <C-k> :cprev<CR>
+nnoremap <leader><CR> :so ~/.config/nvim/init.vim<CR>
+
+
 " Display buffers in the airline
-"let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
 
 
 " Undo tree remap: allows me to open with U and shift window focus to undotree split
@@ -204,70 +221,3 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-
-
-"lua << EOF
-"local nvim_lsp = require('lspconfig')
-"local on_attach = function(client, bufnr)
-  "local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  "local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-  "buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  "-- Mappings.
-  "local opts = { noremap=true, silent=true }
-  "buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  "buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  "buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  "buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  "buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  "buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  "buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  "buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  "buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  "buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  "buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  "buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  "buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  "buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  "buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-
-  "-- Set some keybinds conditional on server capabilities
-  "if client.resolved_capabilities.document_formatting then
-    "buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  "elseif client.resolved_capabilities.document_range_formatting then
-    "buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
-  "end
-
-  "-- Set autocommands conditional on server_capabilities
-  "if client.resolved_capabilities.document_highlight then
-    "vim.api.nvim_exec([[
-      "hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-      "hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-      "hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
-      "augroup lsp_document_highlight
-        "autocmd! * <buffer>
-        "autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-        "autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-      "augroup END
-    "]], false)
-  "end
-"end
-
-"-- Use a loop to conveniently both setup defined servers 
-"-- and map buffer local keybindings when the language server attaches
-"local servers = { "pyright", "rust_analyzer", "tsserver" }
-"for _, lsp in ipairs(servers) do
-  "nvim_lsp[lsp].setup { on_attach = on_attach }
-"end
-"EOF
-
-"lua require'lspconfig'.pyls.setup{on_attach=require'completion'.on_attach}
-"inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-"inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-"" Set completeopt to have a better completion experience
-"set completeopt=menuone,noinsert,noselect
-
-"" Avoid showing message extra message when using completion
-"set shortmess+=c
