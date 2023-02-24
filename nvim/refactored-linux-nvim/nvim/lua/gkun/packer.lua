@@ -31,7 +31,7 @@ return require('packer').startup(function(use)
   use 'nvim-tree/nvim-web-devicons'
 
   -- rainbow parentheses
-  --use('junegunn/rainbow_parentheses.vim')
+  use('junegunn/rainbow_parentheses.vim')
 
   -- Plugin for changing surrounding brackets
   use('tpope/vim-surround')
@@ -56,9 +56,6 @@ return require('packer').startup(function(use)
   use('tpope/vim-fugitive')
   -- Need the Git gutter for moving through hunks of all changes
   use('airblade/vim-gitgutter')
-
-  -- TODO
-  use('sheerun/vim-polyglot')
 
   -- cool animation plugin
   use('Eandrju/cellular-automaton.nvim')

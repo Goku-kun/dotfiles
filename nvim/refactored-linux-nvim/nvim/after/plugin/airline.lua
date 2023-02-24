@@ -3,7 +3,6 @@ vim.g.airline_theme = 'oceanicnext'
 -- show the open buffers tab
 vim.g["airline#extensions#tabline#enabled"] = 1
 
-
 -- options about the statusline representation
 vim.g.airline_left_sep = ''
 vim.g.airline_left_alt_sep = ''

@@ -13,6 +13,7 @@ vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.cmd("set clipboard=unnamedplus")
+vim.cmd[[au TextYankPost * silent! lua vim.highlight.on_yank()]]
 
 --vim.opt.wrap = false
 
@@ -47,8 +48,6 @@ vim.g.python_host_prog = '/usr/bin/python'
 vim.g.python3_host_prog = '/usr/bin/python3'
 
 vim.g.rustfmt_autosave = 1
-
-
 
 --vim.g.rainbow#max_level = 16
 --vim.g.rainbow#pairs = "[['(', ')'], ['[', ']'], ['{', '}']]"
