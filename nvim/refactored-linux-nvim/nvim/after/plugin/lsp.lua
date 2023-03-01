@@ -24,7 +24,16 @@ cmp_mappings['<Tab>'] = nil
 cmp_mappings['<S-Tab>'] = nil
 
 lsp.setup_nvim_cmp({
-    mapping = cmp_mappings
+    mapping = cmp_mappings,
+    sources = {
+        { name = 'nvim_lua' },
+        { name = 'nvim_lsp' },
+        { name = 'buffer' },
+        { name = 'path' },
+        { name = 'cmp_tabnine' },
+        { name = 'cmp_path' },
+        { name = 'cmp_buffer' },
+    }
 })
 
 lsp.set_preferences({
@@ -53,6 +62,7 @@ local function on_attach(client, bufnr)
     vim.keymap.set("n", "<leader>lrn", function() vim.lsp.buf.rename() end, opts)
     vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
     vim.keymap.set("n", "<space>pp", function() vim.lsp.buf.format() end, opts)
+
 end
 
 lsp.on_attach(on_attach)
