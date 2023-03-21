@@ -6,6 +6,7 @@ lsp.ensure_installed({
     'eslint',
     'lua_ls',
     'rust_analyzer',
+    'clangd'
 })
 
 
@@ -46,6 +47,15 @@ lsp.set_preferences({
     }
 })
 
+
+lsp.setup()
+
+vim.diagnostic.config({
+    virtual_text = true,
+    underline = false,
+})
+
+
 local function on_attach(client, bufnr)
     local opts = { buffer = bufnr, remap = false }
 
@@ -62,17 +72,9 @@ local function on_attach(client, bufnr)
     vim.keymap.set("n", "<leader>lrn", function() vim.lsp.buf.rename() end, opts)
     vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
     vim.keymap.set("n", "<space>pp", function() vim.lsp.buf.format() end, opts)
-
 end
 
 lsp.on_attach(on_attach)
-
-lsp.setup()
-
-vim.diagnostic.config({
-    virtual_text = true,
-    underline = false,
-})
 
 require 'lspconfig'.lua_ls.setup {
     settings = {
@@ -85,30 +87,53 @@ require 'lspconfig'.lua_ls.setup {
     on_attach = on_attach
 }
 
+
 require "lspconfig".tsserver.setup {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+    on_attach = on_attach,
 }
 
--- prettier specific section
-local prettier = require("prettier")
+require "lspconfig".clangd.setup {
+    on_attach = on_attach,
+    filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+    single_file_support = true,
+}
 
-prettier.setup({
-    bin = 'prettier',
-    filetypes = {
-        "css",
-        "graphql",
-        "html",
-        "javascript",
-        "javascriptreact",
-        "json",
-        "less",
-        "markdown",
-        "scss",
-        "typescript",
-        "typescriptreaet",
-        "yaml",
-    },
-})
-
-vim.keymap.set({ "x", "n" }, "<leader>fp", vim.cmd.Prettier)
 vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)
+
+--[[prettier specific section]]
+--[[local null_ls = require("null-ls")]]
+--[[null_ls.setup({]]
+--[[on_attach = function(client, bufnr)]]
+--[[if client.supports_method("textDocument/formatting") then]]
+--[[vim.keymap.set("n", "<leader>fp", function()]]
+--[[vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })]]
+--[[end, { buffer = bufnr, desc = "[lsp] format" })]]
+--[[end]]
+--[[if client.supports_method("textDocument/rangeFormatting") then]]
+--[[vim.keymap.set("x", "<leader>fp", function()]]
+--[[vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })]]
+--[[end, { buffer = bufnr, desc = "[lsp] format" })]]
+--[[end]]
+--[[end]]
+--[[})]]
+--[[local prettier = require("prettier")]]
+--[[prettier.setup({]]
+--[[bin = 'prettier',]]
+--[[filetypes = {]]
+--[["css",]]
+--[["graphql",]]
+--[["html",]]
+--[["javascript",]]
+--[["javascriptreact",]]
+--[["json",]]
+--[["less",]]
+--[["markdown",]]
+--[["scss",]]
+--[["typescript",]]
+--[["typescriptreaet",]]
+--[["yaml",]]
+--[[},]]
+--[[})]]
+--[[vim.keymap.set({ "x", "n" }, "<leader>fp", vim.cmd.Prettier)]]
+--[[vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)]]
