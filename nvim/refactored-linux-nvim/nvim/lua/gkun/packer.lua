@@ -86,12 +86,10 @@ return require('packer').startup(function(use)
     use('nvim-treesitter/playground')
     use('theprimeagen/harpoon')
 
-
-    -- Markdown Preview
-    --use({'iamcco/markdown-preview.nvim',
-    --run = function() vim.fn["mkdp#util#install"]() end
-    --})
-
+    -- Indentation guide for treesitter
+    use({
+        "lukas-reineke/indent-blankline.nvim"
+    })
 
 
     -- LSP support
