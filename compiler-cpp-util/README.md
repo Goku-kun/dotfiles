@@ -12,7 +12,6 @@ Only depends on node modules. No extra dependencies needed.
 2. Go into the "compiler-cpp-util" folder and run `sudo npm link`.
 3. That's it. The `compilercpp` command will now be accessible everywhere.
 
-
 ## Usage:
 1. Once the setup is done, use the `compilercpp {FILENAME}` as the command to compile and execute the cpp file.
 2. The terminal will show the stdout and stderr with the respective annotations if the cpp program uses these streams.
