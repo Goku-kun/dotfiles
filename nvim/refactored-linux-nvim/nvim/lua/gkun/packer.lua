@@ -7,7 +7,7 @@ return require('packer').startup(function(use)
     -- Telescope for fuzzy finding
     use({
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.1',
+        tag = '0.1.7',
         -- or                            , branch = '0.1.x',
         requires = { { 'nvim-lua/plenary.nvim', "nvim-telescope/telescope-live-grep-args.nvim" } },
         config = function()
@@ -95,11 +95,12 @@ return require('packer').startup(function(use)
     -- LSP support
     use {
         'VonHeikemen/lsp-zero.nvim',
+        branch = 'v2.x',
         requires = {
             -- LSP Support
-            { 'neovim/nvim-lspconfig' },
             { 'williamboman/mason.nvim' },
             { 'williamboman/mason-lspconfig.nvim' },
+            { 'neovim/nvim-lspconfig' },
 
             -- Autocompletion
             { 'hrsh7th/nvim-cmp' },
@@ -108,6 +109,8 @@ return require('packer').startup(function(use)
             { 'saadparwaiz1/cmp_luasnip' },
             { 'hrsh7th/cmp-nvim-lsp' },
             { 'hrsh7th/cmp-nvim-lua' },
+            { 'williamboman/nvim-lsp-installer' },
+            { 'neovim/nvim-lspconfig' },
 
             -- Snippets
             { 'L3MON4D3/LuaSnip' },
@@ -122,8 +125,25 @@ return require('packer').startup(function(use)
         use('github/copilot.vim')
         --use ('jiangmiao/auto-pairs');
     }
-    use {
-        'fatih/vim-go',
-        run = ':GoUpdateBinaries'
-    }
+
+
+    -- GO Lang support
+
+    --use {
+        --'ray-x/go.nvim',
+        --run = ':GoUpdateBinaries',
+        --requires = {
+            --'nvim-lua/plenary.nvim',
+            --'nvim-lua/popup.nvim',
+            --'nvim-telescope/telescope.nvim',
+            --'nvim-treesitter/nvim-treesitter',
+            --'nvim-treesitter/playground',
+            --'nvim-treesitter/nvim-treesitter-textobjects',
+            --'nvim-treesitter/nvim-treesitter-refactor',
+            --'nvim-treesitter/nvim-treesitter',
+            --'ray-x/guihua.lua',
+        --}
+    --}
+
+
 end)

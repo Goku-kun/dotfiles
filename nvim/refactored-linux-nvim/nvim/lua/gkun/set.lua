@@ -65,3 +65,4 @@ vim.g.rustfmt_autosave = 1
 vim.g.NERDTreeDirArrowExpandable = '▶'
 vim.g.NERDTreeDirArrowCollapsible = '🔽'
 vim.g.NERDTreeShowHidden = 1
+
