@@ -42,3 +42,8 @@ vim.keymap.set("n", "<leader>gsp", builtin.git_status, { desc = '[g]it [s]tatus 
 vim.keymap.set("n", "<leader>ed", function()
     builtin.find_files({ cwd = "~/.config/nvim", prompt = "nvim config files" })
 end, { desc = '[e]dit [d]otfiles' })
+
+vim.keymap.set("n", "<leader>cdcd", function()
+    builtin.find_files({ cwd = "~/programming/work/codedex/", prompt = "nvim config files" })
+end, { desc = 'cd to codedex' })
+

@@ -33,7 +33,7 @@ vim.opt.sidescroll = 15
 
 
 vim.opt.list = true
-vim.opt.listchars = { tab = ">-", trail = "-" }
+vim.opt.listchars = { tab = "  ", trail = " " }
 
 vim.opt.iskeyword:append('-') -- adding  + from words to consider words with - as one single words"
 vim.opt.iskeyword:remove('_') -- removing _ from words to consider words with _ as two different words
@@ -65,4 +65,11 @@ vim.g.rustfmt_autosave = 1
 vim.g.NERDTreeDirArrowExpandable = '▶'
 vim.g.NERDTreeDirArrowCollapsible = '🔽'
 vim.g.NERDTreeShowHidden = 1
+
+vim.api.nvim_create_user_command("Cppath", function ()
+    local path =  vim.fn.expand("%:p")
+    vim.fn.setreg("+", path)
+    vim.notify("Path copied to clipboard")
+    
+end, {})
 

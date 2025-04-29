@@ -3,7 +3,7 @@ lsp.preset('recommended')
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-    ensure_installed = { 'tsserver', 'rust_analyzer', 'eslint', 'lua_ls'},
+    ensure_installed = { 'ts_ls', 'rust_analyzer', 'eslint', 'lua_ls' },
 })
 
 
@@ -48,10 +48,10 @@ lsp.set_preferences({
 
 lsp.setup()
 
-vim.diagnostic.config({
-    virtual_text = false,
-    underline = false,
-})
+--vim.diagnostic.config({
+--virtual_text = false,
+--underline = false,
+--})
 
 
 local function on_attach(client, bufnr)
@@ -86,7 +86,7 @@ require 'lspconfig'.lua_ls.setup {
 }
 
 
-require "lspconfig".tsserver.setup {
+require "lspconfig".ts_ls.setup {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
     on_attach = on_attach,
 }
@@ -107,6 +107,12 @@ require "lspconfig".pyright.setup {
     filetypes = { "python" },
 }
 
+require "lspconfig".cssls.setup({
+    settings = {
+        css = { lint = { unknownAtRules = "ignore" } }
+    }
+})
+
 vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)
 
 local null_ls = require("null-ls")
@@ -116,49 +122,58 @@ local event = "BufWritePre" -- or "BufWritePost"
 local async = event == "BufWritePost"
 
 null_ls.setup({
-  on_attach = function(client, bufnr)
-    if client.supports_method("textDocument/formatting") then
-      vim.keymap.set("i", "<C-s>", function()
-        vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
-      end, { buffer = bufnr, desc = "[lsp] format" })
+    on_attach = function(client, bufnr)
+        if client.supports_method("textDocument/formatting") then
+            vim.keymap.set("i", "<C-s>", function()
+                vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+            end, { buffer = bufnr, desc = "[lsp] format" })
 
-      -- format on save
-      --vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
-      --vim.api.nvim_create_autocmd(event, {
-        --buffer = bufnr,
-        --group = group,
-        --callback = function()
-          --vim.lsp.buf.format({ bufnr = bufnr, async = async })
-        --end,
-        --desc = "[lsp] format on save",
-      --})
-    end
+            -- format on save
+            --vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
+            --vim.api.nvim_create_autocmd(event, {
+            --buffer = bufnr,
+            --group = group,
+            --callback = function()
+            --vim.lsp.buf.format({ bufnr = bufnr, async = async })
+            --end,
+            --desc = "[lsp] format on save",
+            --})
+        end
 
-    if client.supports_method("textDocument/rangeFormatting") then
-      vim.keymap.set("x", "<Leader>f", function()
-        vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
-      end, { buffer = bufnr, desc = "[lsp] format" })
+        if client.supports_method("textDocument/rangeFormatting") then
+            vim.keymap.set("x", "<Leader>f", function()
+                vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+            end, { buffer = bufnr, desc = "[lsp] format" })
+        end
+    end,
+})
+
+-- recognizing gohtml files as html
+local goHtmlFileType = vim.api.nvim_create_augroup('filetype_gohtml', { clear = true })
+vim.api.nvim_create_autocmd('filetype', {
+    group = goHtmlFileType,
+    pattern = '.gohtml',
+    callback = function()
+        vim.bo.filetype = 'html'
     end
-  end,
 })
 
 local prettier = require("prettier")
 
 prettier.setup({
-  bin = 'prettier', -- or `'prettierd'` (v0.23.3+)
-  filetypes = {
-    "css",
-    "graphql",
-    "html",
-    "javascript",
-    "javascriptreact",
-    "json",
-    "less",
-    "markdown",
-    "scss",
-    "typescript",
-    "typescriptreact",
-    "yaml",
-  },
+    bin = 'prettier', -- or `'prettierd'` (v0.23.3+)
+    filetypes = {
+        "css",
+        "graphql",
+        "html",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "less",
+        "markdown",
+        "scss",
+        "typescript",
+        "typescriptreact",
+        "yaml",
+    },
 })
-
