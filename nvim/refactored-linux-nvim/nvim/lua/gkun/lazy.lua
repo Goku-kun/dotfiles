@@ -120,10 +120,25 @@ require("lazy").setup({
 
     -- Treesitter for language parsing
     { 'nvim-treesitter/nvim-treesitter' },
+    {
+        'nvim-treesitter/nvim-treesitter-context',
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+        config = function()
+            require("treesitter-context").setup({
+                enable = false,          -- Enable this plugin (Can be enabled/disabled later via commands)
+                max_lines = 0,           -- How many lines the window should span. Values <= 0 mean no limit.
+                trim_scope = "outer",    -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+                min_window_height = 0,   -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+                line_numbers = true,     -- Use number of context line. Should it always be shown?
+                zindex = 20,             -- The Z-index of the context window. It controls on which side of the code the context should appear.
+                mode = "cursor",         -- Line used to calculate context. Choices: 'cursor', 'topline'
+                multiline_threshold = 1, -- When there are multiple lines in the context, this is the threshold for how many lines should be shown.
+            })
+        end
+    },
     -- Used to select/swap/yank text objects in treesitter; see treesitter.lua for more
     {
         "nvim-treesitter/nvim-treesitter-textobjects",
-        -- how to load after a plugin in lazy.nvim
         after = "nvim-treesitter",
         dependencies = { "nvim-treesitter/nvim-treesitter" },
     },
@@ -188,5 +203,45 @@ require("lazy").setup({
         lazy = false,
     },
 
-    {'JoosepAlviste/nvim-ts-context-commentstring'},
+    { 'JoosepAlviste/nvim-ts-context-commentstring' },
+
+    {
+        "olimorris/codecompanion.nvim",
+        opts = {},
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+            "ravitemer/mcphub.nvim"
+        },
+    },
+
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        ft = { "markdown", "codecompanion" }
+    },
+    {
+        "echasnovski/mini.diff",
+        config = function()
+            local diff = require("mini.diff")
+            diff.setup({
+                -- Disabled by default
+                source = diff.gen_source.none(),
+            })
+        end,
+    },
+
+    {
+        "HakonHarnes/img-clip.nvim",
+        opts = {
+            filetypes = {
+                codecompanion = {
+                    prompt_for_file_name = false,
+                    template = "[Image]($FILE_PATH)",
+                    use_absolute_path = true,
+                },
+            },
+        },
+    },
+
+    checker = { enabled = true }
 })

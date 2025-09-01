@@ -34,8 +34,14 @@ vim.keymap.set("n", "<leader>gcp", builtin.git_commits, { desc = '[g]it [c]ommit
 -- git branches picker
 vim.keymap.set("n", "<leader>gbp", builtin.git_branches, { desc = '[g]it [b]ranch [p]icker' })
 
--- git status picker
-vim.keymap.set("n", "<leader>gsp", builtin.git_status, { desc = '[g]it [s]tatus [p]icker' })
+-- git stash picker
+vim.keymap.set("n", "<leader>gsp", builtin.git_stash, { desc = '[g]it [s]tash [p]icker' })
+
+vim.keymap.set("n", "<leader>:", builtin.commands, { desc = 'list [c]ommands' })
+
+vim.keymap.set("n", "<leader>km", builtin.keymaps, { desc = 'list [k]ey[m]aps' })
+
+vim.keymap.set("n", "<leader>/", builtin.current_buffer_fuzzy_find, { desc = '[/] fuzzy find in current buffer' })
 
 
 -- configure nvim dotfiles from anywhere
