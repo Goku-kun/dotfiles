@@ -39,10 +39,7 @@ require("lazy").setup({
     { 'raimondi/delimitmate' },
 
     -- Indentation guide
-    { 'nathanaelkane/vim-indent-guides' },
-
-    -- Nerd commentor for comments
-    --{ 'preservim/nerdcommenter' },
+    -- { 'nathanaelkane/vim-indent-guides' },
 
     -- Devicons for files
     { 'nvim-tree/nvim-web-devicons' },

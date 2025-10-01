@@ -48,9 +48,11 @@ vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
 
 
-vim.opt.updatetime = 250
+vim.opt.updatetime = 200
 vim.o.timeout = true
 vim.o.timeoutlen = 300
+vim.opt.lazyredraw = true        -- Only redraw when needed
+vim.opt.redrawtime = 10000       -- Allow more time for redraws
 
 
 vim.g.python_host_prog = '/usr/bin/python'

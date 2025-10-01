@@ -45,6 +45,8 @@ vim.keymap.set("n", "<leader>k", "<cmd>lprev<CR>zz")
 -- remap for making a file executable
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
+vim.keymap.set("n", "<leader>cp", "<cmd>let @+ = expand('%:p')<CR>", { silent = true })
+
 
 -- source the init.lua file
 --vim.keymap.set("n", "<leader><CR>", "<cmd>so ~/.config/nvim/init.lua<CR>")

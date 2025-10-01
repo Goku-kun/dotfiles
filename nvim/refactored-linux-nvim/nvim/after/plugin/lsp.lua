@@ -29,9 +29,9 @@ lsp.setup_nvim_cmp({
         { name = 'nvim_lsp' },
         { name = 'buffer' },
         { name = 'path' },
-        { name = 'cmp_tabnine' },
-        { name = 'cmp_path' },
-        { name = 'cmp_buffer' },
+        -- { name = 'cmp_tabnine' },
+        -- { name = 'cmp_path' },
+        -- { name = 'cmp_buffer' },
     }
 })
 
@@ -113,6 +113,11 @@ require "lspconfig".cssls.setup({
     }
 })
 
+require "lspconfig".taplo.setup {
+    on_attach = on_attach,
+    filetypes = { "yaml", "toml" },
+}
+
 vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)
 
 local null_ls = require("null-ls")
@@ -122,12 +127,18 @@ local event = "BufWritePre" -- or "BufWritePost"
 local async = event == "BufWritePost"
 
 null_ls.setup({
+    sources = {
+
+        null_ls.builtins.formatting.prettier.with({
+            filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json", "css", "scss", "markdown", "yaml", "html" },
+        }),
+
+    },
     on_attach = function(client, bufnr)
         if client.supports_method("textDocument/formatting") then
             vim.keymap.set("i", "<C-s>", function()
                 vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
             end, { buffer = bufnr, desc = "[lsp] format" })
-
             -- format on save
             --vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
             --vim.api.nvim_create_autocmd(event, {
@@ -177,3 +188,10 @@ prettier.setup({
         "yaml",
     },
 })
+
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--     pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
+--     callback = function()
+--         require("prettier").format()
+--     end,
+-- })
