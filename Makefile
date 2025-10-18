@@ -19,7 +19,15 @@ setup_alacritty:
 	mkdir -p $(ALACRITTY_DEST_DIR)
 	cp -r $(ALACRITTY_SRC_DIR)/* $(ALACRITTY_DEST_DIR)/
 	@echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
-install_nvim_debian: nvim
+install_nvim_debian_root: setup_nvim
+	@echo "Installing Neovim on Debian as root..."
+	apt-get install ninja-build gettext cmake curl build-essential git
+    git clone https://github.com/neovim/neovim
+	cd neovim && make CMAKE_BUILD_TYPE=Release
+	make install
+	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
+	nvim --version
+install_nvim_debian: setup_nvim
 	@echo "Installing Neovim on Debian..."
 	sudo apt-get install ninja-build gettext cmake curl build-essential git
     git clone https://github.com/neovim/neovim
@@ -27,11 +35,11 @@ install_nvim_debian: nvim
 	sudo make install
 	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
 	nvim --version
-install_nvim_mac: nvim
+install_nvim_mac: setup_nvim
 	@echo "Installing Neovim via Homebrew..."
 	brew install neovim
 	nvim --version
-install_alacritty_mac: alacritty
+install_alacritty_mac: setup_alacritty
 	@echo "Installing Alacritty via Homebrew..."
 	# go to alacritty github page to get the latest installation instructions
 	open "https://github.com/alacritty/alacritty/releases"
