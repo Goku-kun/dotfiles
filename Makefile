@@ -21,10 +21,10 @@ setup_alacritty:
 	@echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
 install_nvim_debian_root: setup_nvim
 	@echo "Installing Neovim on Debian as root..."
-	apt-get install ninja-build gettext cmake curl build-essential git
+	apt install ninja-build gettext cmake curl build-essential git
     git clone https://github.com/neovim/neovim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
-	make install
+	make install -y
 	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
 	nvim --version
 install_nvim_debian: setup_nvim
