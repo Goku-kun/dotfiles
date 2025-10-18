@@ -58,6 +58,7 @@ local function on_attach(client, bufnr)
     local opts = { buffer = bufnr, remap = false }
 
     vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
+    vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, opts)
     vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
     vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, opts)
     vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.document_symbol() end, opts)
@@ -74,7 +75,7 @@ end
 
 lsp.on_attach(on_attach)
 
-require 'lspconfig'.lua_ls.setup {
+vim.lsp.config('lua_ls', {
     settings = {
         Lua = {
             diagnostics = {
@@ -82,42 +83,40 @@ require 'lspconfig'.lua_ls.setup {
             }
         }
     },
-    on_attach = on_attach
-}
+    on_attach = on_attach,
+})
 
-
-require "lspconfig".ts_ls.setup {
+vim.lsp.config('ts_ls', {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
     on_attach = on_attach,
-}
+})
 
-require "lspconfig".clangd.setup {
+vim.lsp.config('clangd', {
     on_attach = on_attach,
     filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
     single_file_support = true,
-}
+})
 
-require "lspconfig".marksman.setup {
+vim.lsp.config('marksman', {
     on_attach = on_attach,
     filetypes = { "markdown" },
-}
+})
 
-require "lspconfig".pyright.setup {
+vim.lsp.config('pyright', {
     on_attach = on_attach,
     filetypes = { "python" },
-}
+})
 
-require "lspconfig".cssls.setup({
+vim.lsp.config('cssls', {
     settings = {
         css = { lint = { unknownAtRules = "ignore" } }
     }
 })
 
-require "lspconfig".taplo.setup {
+vim.lsp.config('taplo', {
     on_attach = on_attach,
     filetypes = { "yaml", "toml" },
-}
-
+})
 vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)
 
 local null_ls = require("null-ls")
@@ -188,6 +187,8 @@ prettier.setup({
         "yaml",
     },
 })
+
+vim.lsp.config("docker_language_server", {})
 
 -- vim.api.nvim_create_autocmd("BufWritePre", {
 --     pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
