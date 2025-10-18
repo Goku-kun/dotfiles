@@ -22,7 +22,7 @@ setup_alacritty:
 install_nvim_debian_root: setup_nvim
 	@echo "Installing Neovim on Debian as root..."
 	apt install ninja-build gettext cmake curl build-essential git
-    git clone https://github.com/neovim/neovim
+	git clone https://github.com/neovim/neovim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
 	make install -y
 	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
