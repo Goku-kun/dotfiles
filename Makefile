@@ -19,6 +19,14 @@ setup_alacritty:
 	mkdir -p $(ALACRITTY_DEST_DIR)
 	cp -r $(ALACRITTY_SRC_DIR)/* $(ALACRITTY_DEST_DIR)/
 	@echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
+install_nvim_debian: nvim
+	@echo "Installing Neovim on Debian..."
+	sudo apt-get install ninja-build gettext cmake curl build-essential git
+    git clone https://github.com/neovim/neovim
+	cd neovim && make CMAKE_BUILD_TYPE=Release
+	sudo make install
+	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
+	nvim --version
 install_nvim_mac: nvim
 	@echo "Installing Neovim via Homebrew..."
 	brew install neovim
