@@ -8,21 +8,33 @@ ALACRITTY_SRC_DIR := ./alacritty
 ALACRITTY_DEST_DIR := $(HOME)/.config/alacritty
 
 
-.PHONY: all nvim alacritty
-all: nvim alacritty
+.PHONY: all setup_nvim setup_alacritty
+all: setup_nvim setup_alacritty
 
-nvim:
+setup_nvim:
 	mkdir -p $(NVIM_DEST_DIR)
 	cp -r $(NVIM_SRC_DIR)/* $(NVIM_DEST_DIR)/
-	echo "Neovim configuration copied to $(NVIM_DEST_DIR)"
-alacritty:
+	@echo "Neovim configuration copied to $(NVIM_DEST_DIR)"
+setup_alacritty:
 	mkdir -p $(ALACRITTY_DEST_DIR)
 	cp -r $(ALACRITTY_SRC_DIR)/* $(ALACRITTY_DEST_DIR)/
-	echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
-clean:
+	@echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
+install_nvim_mac: nvim
+	@echo "Installing Neovim via Homebrew..."
+	brew install neovim
+	nvim --version
+install_alacritty_mac: alacritty
+	@echo "Installing Alacritty via Homebrew..."
+	# go to alacritty github page to get the latest installation instructions
+	open "https://github.com/alacritty/alacritty/releases"
+clean_nvim:
 	rm -rf $(NVIM_DEST_DIR)/*
+	@echo "Neovim configuration files removed from $(NVIM_DEST_DIR)"
+clean_alacritty:
 	rm -rf $(ALACRITTY_DEST_DIR)/*
-	echo "Configuration files removed from $(NVIM_DEST_DIR) and $(ALACRITTY_DEST_DIR)"
+	@echo "Alacritty configuration files removed from $(ALACRITTY_DEST_DIR)"
+clean: clean_nvim clean_alacritty
+	@echo "Configuration files removed from $(NVIM_DEST_DIR) and $(ALACRITTY_DEST_DIR)"
 reverse_nvim:
 	@echo "Reversing Neovim configuration update."
 	mkdir -p $(NVIM_SRC_DIR)
@@ -48,8 +60,10 @@ help:
 	@echo "# Makefile commands:"
 	@echo "Usage: make [target]"
 	@echo "  all        		- Set up both Neovim and Alacritty configurations"
-	@echo "  nvim       		- Set up Neovim configuration"
-	@echo "  alacritty  		- Set up Alacritty configuration"
+	@echo "  install_nvim_mac  - Install Neovim on macOS using Homebrew"
+	@echo "  install_alacritty_mac - Install Alacritty on macOS by visting the GitHub releases page"
+	@echo "  setup_nvim       	- Set up Neovim configuration"
+	@echo "  setup_alacritty  	- Set up Alacritty configuration"
 	@echo "  reverse_nvim 		- Copy Neovim configuration back to source directory"
 	@echo "  reverse_alacritty  - Copy Alacritty configuration back to source directory"
 	@echo "  clean      		- Remove configuration files"
