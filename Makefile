@@ -25,7 +25,6 @@ install_nvim_debian_root: setup_nvim
 	git clone https://github.com/neovim/neovim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
 	make install
-	make CMAKE_INSTALL_PREFIX=$(HOME)/local/nvim install
 	nvim --version
 install_nvim_debian: setup_nvim
 	@echo "Installing Neovim on Debian..."
