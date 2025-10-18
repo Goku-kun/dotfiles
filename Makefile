@@ -24,14 +24,14 @@ install_nvim_debian_root: setup_nvim
 	apt install ninja-build gettext cmake curl build-essential git
 	git clone https://github.com/neovim/neovim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
-	make install
+	cd neovim && make install
 	nvim --version
 install_nvim_debian: setup_nvim
 	@echo "Installing Neovim on Debian..."
 	sudo apt install ninja-build gettext cmake curl build-essential git
     git clone https://github.com/neovim/neovim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
-	sudo make install
+	cd neovim && make install
 	nvim --version
 install_nvim_mac: setup_nvim
 	@echo "Installing Neovim via Homebrew..."
