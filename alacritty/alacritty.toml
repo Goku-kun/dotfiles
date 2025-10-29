@@ -6,7 +6,7 @@ italic = { family = "FiraCode Nerd Font Mono", style = "Italic" }
 size = 16.0
 
 [window]
-opacity = 0.9
+opacity = 0.75
 blur = true
 startup_mode = "Maximized"
 
