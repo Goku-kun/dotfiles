@@ -1,5 +1,5 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     local lazyrepo = "https://github.com/folke/lazy.nvim.git"
     local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
     if vim.v.shell_error ~= 0 then
@@ -20,62 +20,115 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
-
 require("lazy").setup({
-    -- Telescope for fuzzy finding
+    -- Telescope for fuzzy finding - lazy-loaded on command and keybindings
     {
-        'nvim-telescope/telescope.nvim',
-        tag = '0.1.8',
-        dependencies = { 'nvim-lua/plenary.nvim', "nvim-telescope/telescope-live-grep-args.nvim" },
+        "nvim-telescope/telescope.nvim",
+        cmd = "Telescope",
+        tag = "0.1.8",
+        keys = {
+            { "<leader>ff",   desc = "Find files" },
+            { "<leader>fg",   desc = "Live grep" },
+            { "<leader>fb",   desc = "Find buffers" },
+            { "<leader>fh",   desc = "Find help" },
+            { "<leader>fd",   desc = "Find diagnostics" },
+            { "<leader>gcp",  desc = "Git commit picker" },
+            { "<leader>gbp",  desc = "Git branch picker" },
+            { "<leader>gsp",  desc = "Git stash picker" },
+            { "<leader>:",    desc = "Command history" },
+            { "<leader>km",   desc = "Keymaps" },
+            { "<leader>/",    desc = "Fuzzy find buffer" },
+            { "<leader>ed",   desc = "Edit dotfiles" },
+            { "<leader>cdcd", desc = "CD to codedex" },
+            { "<C-p>",        desc = "Git files" },
+        },
+        dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-live-grep-args.nvim" },
         config = function()
             require("telescope").load_extension("live_grep_args")
-        end
+        end,
     },
 
     -- OceanicNext Theme installation (config in colors.lua)
-    { 'mhartington/oceanic-next' },
+    { "mhartington/oceanic-next" },
 
     -- Autocomplete brackets/quotes and other help in insert mode
-    { 'raimondi/delimitmate' },
+    { "raimondi/delimitmate" },
 
     -- Indentation guide
     -- { 'nathanaelkane/vim-indent-guides' },
 
     -- Devicons for files
-    { 'nvim-tree/nvim-web-devicons' },
+    { "nvim-tree/nvim-web-devicons" },
 
     -- rainbow parentheses
-    { 'junegunn/rainbow_parentheses.vim' },
+    { "junegunn/rainbow_parentheses.vim" },
 
     -- Plugin for changing surrounding brackets
-    { 'tpope/vim-surround' },
+    { "tpope/vim-surround" },
 
     -- Edge colorscheme
-    { 'sainnhe/edge' },
+    { "sainnhe/edge" },
 
     -- vim-airline for cool statusbar line
-    { 'vim-airline/vim-airline' },
-    { 'vim-airline/vim-airline-themes' },
+    {
+        "nvim-lualine/lualine.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        event = "VeryLazy",
+        opts = {
+            options = {
+                theme = "oceanicnext",
+                section_separators = "",
+                component_separators = "",
+                globalstatus = true, -- Single statusline at bottom
+            },
+            sections = {
+                lualine_a = { "mode" },
+                lualine_b = { "branch", "diff", "diagnostics" },
+                lualine_c = { "filename" },
+                lualine_x = { "encoding", "fileformat", "filetype" },
+                lualine_y = { "progress" },
+                lualine_z = { "location" },
+            },
+            extensions = { "fugitive", "nerdtree" },
+        },
+    },
 
     -- Markdown Previewer
     -- use('iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']})
 
-    -- Nerd Tree
-    { 'preservim/nerdtree' },
+    -- Neo-tree - Modern file explorer alternative to NERDTree
+    {
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v3.x",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons",
+            "MunifTanjim/nui.nvim",
+        },
+        cmd = "Neotree",
+    },
+
+    -- Bufferline - Show open buffers as tabs at the top
+    {
+        "akinsho/bufferline.nvim",
+        version = "*",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        event = "VeryLazy",
+    },
 
     -- UNDO tree
-    { 'mbbill/undotree' },
+    { "mbbill/undotree" },
 
     -- VIM FUGITIVE!
-    { 'tpope/vim-fugitive' },
+    { "tpope/vim-fugitive" },
     -- Need the Git gutter for moving through hunks of all changes
-    { 'airblade/vim-gitgutter' },
+    { "airblade/vim-gitgutter" },
 
     -- cool animation plugin
-    { 'Eandrju/cellular-automaton.nvim' },
+    { "Eandrju/cellular-automaton.nvim" },
 
     -- Practice vim game
-    { 'ThePrimeagen/vim-be-good' },
+    { "ThePrimeagen/vim-be-good" },
 
     {
         "folke/trouble.nvim",
@@ -115,31 +168,33 @@ require("lazy").setup({
         },
     },
 
-    -- Treesitter for language parsing
-    { 'nvim-treesitter/nvim-treesitter' },
+    -- Treesitter for advanced syntax highlighting - lazy-loaded on file open
     {
-        'nvim-treesitter/nvim-treesitter-context',
+        "nvim-treesitter/nvim-treesitter",
+        event = { "BufReadPost", "BufNewFile" },
+        build = ":TSUpdate",
+    },
+    {
+        "nvim-treesitter/nvim-treesitter-context",
         dependencies = { "nvim-treesitter/nvim-treesitter" },
         config = function()
             require("treesitter-context").setup({
-                enable = false,          -- Enable this plugin (Can be enabled/disabled later via commands)
-                max_lines = 0,           -- How many lines the window should span. Values <= 0 mean no limit.
-                trim_scope = "outer",    -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-                min_window_height = 0,   -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-                line_numbers = true,     -- Use number of context line. Should it always be shown?
-                zindex = 20,             -- The Z-index of the context window. It controls on which side of the code the context should appear.
-                mode = "cursor",         -- Line used to calculate context. Choices: 'cursor', 'topline'
+                enable = false, -- Enable this plugin (Can be enabled/disabled later via commands)
+                max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+                trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+                min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+                line_numbers = true, -- Use number of context line. Should it always be shown?
+                zindex = 20, -- The Z-index of the context window. It controls on which side of the code the context should appear.
+                mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
                 multiline_threshold = 1, -- When there are multiple lines in the context, this is the threshold for how many lines should be shown.
             })
-        end
+        end,
     },
     -- Used to select/swap/yank text objects in treesitter; see treesitter.lua for more
     {
         "nvim-treesitter/nvim-treesitter-textobjects",
-        after = "nvim-treesitter",
         dependencies = { "nvim-treesitter/nvim-treesitter" },
     },
-
 
     -- Treesitter refactor
     {
@@ -153,12 +208,12 @@ require("lazy").setup({
         after = "nvim-treesitter",
         dependencies = { "nvim-treesitter/nvim-treesitter" },
     },
-    { 'nvim-treesitter/playground' },
-    { 'theprimeagen/harpoon' },
+    { "nvim-treesitter/playground" },
+    { "theprimeagen/harpoon" },
 
     -- Indentation guide for treesitter
     { "lukas-reineke/indent-blankline.nvim" },
-    { 'https://codeberg.org/esensar/nvim-dev-container' },
+    { "https://codeberg.org/esensar/nvim-dev-container" },
 
     -- smear cursor
     -- {
@@ -186,55 +241,92 @@ require("lazy").setup({
 
     { "ggandor/leap.nvim" },
 
-
     -- LSP support
+    -- LSP: Mason for package management
     {
-        'VonHeikemen/lsp-zero.nvim',
-        branch = 'v2.x',
-        dependencies = {
-            -- LSP Support
-            { 'williamboman/mason.nvim' },
-            {
-                "mason-org/mason-lspconfig.nvim",
-                opts = {},
-                dependencies = {
-                    { "mason-org/mason.nvim", opts = {} },
-                    "neovim/nvim-lspconfig",
-                },
-            },
-            { 'neovim/nvim-lspconfig' },
-
-            -- Autocompletion
-            { 'hrsh7th/nvim-cmp' },
-            { 'hrsh7th/cmp-buffer' },
-            { 'hrsh7th/cmp-path' },
-            { 'saadparwaiz1/cmp_luasnip' },
-            { 'hrsh7th/cmp-nvim-lsp' },
-            { 'hrsh7th/cmp-nvim-lua' },
-            { 'williamboman/nvim-lsp-installer' },
-            { 'neovim/nvim-lspconfig' },
-
-            -- Snippets
-            { 'L3MON4D3/LuaSnip' },
-            { 'rafamadriz/friendly-snippets' },
-
-
-            -- prettier for JS,TS
-            { 'nvimtools/none-ls.nvim' },
-            { 'MunifTanjim/prettier.nvim' }
-        },
-
-        --use ('jiangmiao/auto-pairs');
+        "williamboman/mason.nvim",
+        cmd = "Mason",
+        build = ":MasonUpdate",
+        opts = {},
     },
 
-    { 'github/copilot.vim' },
+    -- LSP: Bridge between Mason and lspconfig
+    {
+        "williamboman/mason-lspconfig.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        opts = {
+            ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
+            automatic_installation = true,
+        },
+    },
+
+    -- LSP: Neovim LSP configuration
+    {
+        "neovim/nvim-lspconfig",
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = {
+            "williamboman/mason.nvim",
+            "williamboman/mason-lspconfig.nvim",
+        },
+    },
+
+    -- Completion engine
+    {
+        "hrsh7th/nvim-cmp",
+        event = "InsertEnter",
+        dependencies = {
+            "hrsh7th/cmp-nvim-lsp",
+            "hrsh7th/cmp-buffer",
+            "hrsh7th/cmp-path",
+            "hrsh7th/cmp-nvim-lua",
+            "saadparwaiz1/cmp_luasnip",
+            "L3MON4D3/LuaSnip",
+            "rafamadriz/friendly-snippets",
+        },
+    },
+
+    -- Individual completion sources
+    { "hrsh7th/cmp-nvim-lsp", lazy = true },
+    { "hrsh7th/cmp-buffer",   lazy = true },
+    { "hrsh7th/cmp-path",     lazy = true },
+    { "hrsh7th/cmp-nvim-lua", lazy = true },
+
+    -- Snippet engine
+    {
+        "L3MON4D3/LuaSnip",
+        lazy = true,
+        build = "make install_jsregexp",
+    },
+    { "saadparwaiz1/cmp_luasnip",     lazy = true },
+    { "rafamadriz/friendly-snippets", lazy = true },
+
+    -- Formatting: none-ls and prettier
+    {
+        "nvimtools/none-ls.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = { "nvim-lua/plenary.nvim" },
+    },
+    {
+        "MunifTanjim/prettier.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = { "nvimtools/none-ls.nvim" },
+    },
+
+    {
+        "github/copilot.vim",
+        event = "InsertEnter",
+    },
 
     {
         "numToStr/Comment.nvim",
-        lazy = false,
+        keys = {
+            { "gc", mode = { "n", "v" }, desc = "Comment toggle linewise" },
+            { "gb", mode = { "n", "v" }, desc = "Comment toggle blockwise" },
+        },
+        opts = {},
     },
 
-    { 'JoosepAlviste/nvim-ts-context-commentstring' },
+    { "JoosepAlviste/nvim-ts-context-commentstring" },
 
     {
         "olimorris/codecompanion.nvim",
@@ -242,13 +334,13 @@ require("lazy").setup({
         dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-treesitter/nvim-treesitter",
-            "ravitemer/mcphub.nvim"
+            "ravitemer/mcphub.nvim",
         },
     },
 
     {
         "MeanderingProgrammer/render-markdown.nvim",
-        ft = { "markdown", "codecompanion" }
+        ft = { "markdown", "codecompanion" },
     },
     {
         "echasnovski/mini.diff",
@@ -273,6 +365,7 @@ require("lazy").setup({
             },
         },
     },
+    { "brenoprata10/nvim-highlight-colors" },
 
-    checker = { enabled = true }
+    checker = { enabled = true },
 })
