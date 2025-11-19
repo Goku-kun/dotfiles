@@ -1,198 +1,442 @@
-local lsp = require('lsp-zero')
-lsp.preset('recommended')
+-- ============================================================================
+-- LSP CONFIGURATION - Native Neovim 0.11 APIs
+-- ============================================================================
+-- This file configures Language Server Protocol support using Neovim's native
+-- LSP client. No wrapper libraries needed - Neovim 0.11+ has everything built-in.
+--
+-- Key components:
+-- - vim.lsp.config() - Define LSP server configurations
+-- - vim.lsp.enable() - Enable LSP servers for filetypes
+-- - mason.nvim - Package manager for LSP servers
+-- - nvim-cmp - Completion engine
+-- - null-ls - Formatting and linting
+-- ============================================================================
 
-require('mason').setup({})
-require('mason-lspconfig').setup({
-    ensure_installed = { 'ts_ls', 'rust_analyzer', 'eslint', 'lua_ls' },
+-- ============================================================================
+-- MASON SETUP - LSP Server Package Manager
+-- ============================================================================
+
+require("mason").setup({})
+
+-- Automatically install language servers when needed
+require("mason-lspconfig").setup({
+	ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
+	automatic_installation = true,
 })
 
+-- ============================================================================
+-- COMPLETION SETUP - nvim-cmp Configuration
+-- ============================================================================
 
-local cmp = require('cmp')
+local cmp = require("cmp")
+local luasnip = require("luasnip")
 
-local cmp_select = { behavior = cmp.SelectBehavior.Select }
-local cmp_mappings = lsp.defaults.cmp_mappings({
-    ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-    ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-    ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-    ["<C-Space>"] = cmp.mapping.complete(),
+-- Load friendly-snippets
+require("luasnip.loaders.from_vscode").lazy_load()
+
+cmp.setup({
+	snippet = {
+		expand = function(args)
+			luasnip.lsp_expand(args.body)
+		end,
+	},
+
+	-- Keybindings for completion menu
+	mapping = cmp.mapping.preset.insert({
+		["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+		["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+		["<C-y>"] = cmp.mapping.confirm({ select = true }),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<C-b>"] = cmp.mapping.scroll_docs(-4),
+		["<C-f>"] = cmp.mapping.scroll_docs(4),
+		["<C-e>"] = cmp.mapping.abort(),
+		-- Tab is reserved for Copilot
+		["<Tab>"] = nil,
+		["<S-Tab>"] = nil,
+	}),
+
+	-- Completion sources (order matters)
+	sources = cmp.config.sources({
+		{ name = "nvim_lsp" }, -- LSP completions
+		{ name = "nvim_lua" }, -- Neovim Lua API completions
+		{ name = "luasnip" }, -- Snippet completions
+		{ name = "path" }, -- File path completions
+	}, {
+		{ name = "buffer", keyword_length = 3 }, -- Buffer completions (only after 3 chars)
+	}),
+
+	-- Completion menu appearance
+	window = {
+		completion = cmp.config.window.bordered(),
+		documentation = cmp.config.window.bordered(),
+	},
+
+	-- Formatting of completion items
+	formatting = {
+		fields = { "kind", "abbr", "menu" },
+		format = function(entry, vim_item)
+			vim_item.menu = ({
+				nvim_lsp = "[LSP]",
+				nvim_lua = "[Lua]",
+				luasnip = "[Snip]",
+				buffer = "[Buf]",
+				path = "[Path]",
+			})[entry.source.name]
+			return vim_item
+		end,
+	},
 })
 
--- disable completion with tab
--- this helps with copilot setup
-cmp_mappings['<Tab>'] = nil
-cmp_mappings['<S-Tab>'] = nil
+-- ============================================================================
+-- LSP KEYBINDINGS - Attached to every buffer with LSP
+-- ============================================================================
 
-lsp.setup_nvim_cmp({
-    mapping = cmp_mappings,
-    sources = {
-        { name = 'nvim_lua' },
-        { name = 'nvim_lsp' },
-        { name = 'buffer' },
-        { name = 'path' },
-        -- { name = 'cmp_tabnine' },
-        -- { name = 'cmp_path' },
-        -- { name = 'cmp_buffer' },
-    }
-})
-
-lsp.set_preferences({
-    suggest_lsp_servers = true,
-    sign_icons = {
-        error = 'E',
-        warn = 'W',
-        hint = 'H',
-        info = 'I'
-    }
-})
-
-
-lsp.setup()
-
---vim.diagnostic.config({
---virtual_text = false,
---underline = false,
---})
-
-
+-- This function is called whenever an LSP attaches to a buffer
 local function on_attach(client, bufnr)
-    local opts = { buffer = bufnr, remap = false }
+	local opts = { buffer = bufnr, remap = false }
 
-    vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-    vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, opts)
-    vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-    vim.keymap.set("n", "gi", function() vim.lsp.buf.implementation() end, opts)
-    vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.document_symbol() end, opts)
-    vim.keymap.set("n", "<leader>lws", function() vim.lsp.buf.workspace_symbol() end, opts)
-    vim.keymap.set("n", "<leader>ld", function() vim.diagnostic.open_float() end, opts)
-    vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
-    vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
-    vim.keymap.set("n", "<leader>lca", function() vim.lsp.buf.code_action() end, opts)
-    vim.keymap.set("n", "<leader>lrr", function() vim.lsp.buf.references() end, opts)
-    vim.keymap.set("n", "<leader>lrn", function() vim.lsp.buf.rename() end, opts)
-    vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
-    vim.keymap.set("n", "<space>pp", function() vim.lsp.buf.format() end, opts)
+	-- Jump to definition/declaration
+	vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
+	vim.keymap.set(
+		"n",
+		"gi",
+		vim.lsp.buf.implementation,
+		vim.tbl_extend("force", opts, { desc = "Go to implementation" })
+	)
+
+	-- Hover and signature help
+	vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
+	vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
+
+	-- Workspace and document symbols
+	vim.keymap.set(
+		"n",
+		"<leader>ls",
+		vim.lsp.buf.document_symbol,
+		vim.tbl_extend("force", opts, { desc = "Document symbols" })
+	)
+	vim.keymap.set(
+		"n",
+		"<leader>lws",
+		vim.lsp.buf.workspace_symbol,
+		vim.tbl_extend("force", opts, { desc = "Workspace symbols" })
+	)
+
+	-- Diagnostics
+	vim.keymap.set(
+		"n",
+		"<leader>ld",
+		vim.diagnostic.open_float,
+		vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
+	)
+	vim.keymap.set("n", "[d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+	vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
+
+	-- Code actions and refactoring
+	vim.keymap.set("n", "<leader>lca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
+	vim.keymap.set("n", "<leader>lrr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "References" }))
+	vim.keymap.set("n", "<leader>lrn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
+
+	-- Formatting
+	vim.keymap.set("n", "<leader>fp", vim.lsp.buf.format, vim.tbl_extend("force", opts, { desc = "Format file" }))
+	vim.keymap.set("n", "<space>pp", vim.lsp.buf.format, vim.tbl_extend("force", opts, { desc = "Format file" }))
 end
 
-lsp.on_attach(on_attach)
+-- ============================================================================
+-- LSP SERVER CONFIGURATIONS - Native Neovim 0.11 API
+-- ============================================================================
 
-vim.lsp.config('lua_ls', {
-    settings = {
-        Lua = {
-            diagnostics = {
-                globals = { 'vim' }
-            }
-        }
-    },
-    on_attach = on_attach,
+-- Get default capabilities from nvim-cmp
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Lua Language Server (for Neovim config)
+vim.lsp.config("lua_ls", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		Lua = {
+			runtime = {
+				version = "LuaJIT", -- Neovim uses LuaJIT
+			},
+			diagnostics = {
+				globals = { "vim" }, -- Recognize 'vim' global
+			},
+			workspace = {
+				library = vim.api.nvim_get_runtime_file("", true), -- Neovim runtime files
+				checkThirdParty = false, -- Don't ask about third-party libraries
+			},
+			telemetry = {
+				enable = false,
+			},
+		},
+	},
 })
 
-vim.lsp.config('ts_ls', {
-    filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
-    on_attach = on_attach,
+-- TypeScript/JavaScript Language Server
+vim.lsp.config("ts_ls", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = {
+		"javascript",
+		"javascriptreact",
+		"javascript.jsx",
+		"typescript",
+		"typescriptreact",
+		"typescript.tsx",
+	},
 })
 
-vim.lsp.config('clangd', {
-    on_attach = on_attach,
-    filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-    single_file_support = true,
+-- ESLint Language Server
+vim.lsp.config("eslint", {
+	capabilities = capabilities,
+	on_attach = on_attach,
 })
 
-vim.lsp.config('marksman', {
-    on_attach = on_attach,
-    filetypes = { "markdown" },
+-- Rust Analyzer
+vim.lsp.config("rust_analyzer", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		["rust-analyzer"] = {
+			checkOnSave = {
+				command = "clippy", -- Use clippy for linting
+			},
+		},
+	},
 })
 
-vim.lsp.config('pyright', {
-    on_attach = on_attach,
-    filetypes = { "python" },
+-- C/C++ Language Server (clangd)
+vim.lsp.config("clangd", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
 })
 
-vim.lsp.config('cssls', {
-    settings = {
-        css = { lint = { unknownAtRules = "ignore" } }
-    }
+-- Markdown Language Server
+vim.lsp.config("marksman", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = { "markdown" },
 })
 
-vim.lsp.config('taplo', {
-    on_attach = on_attach,
-    filetypes = { "yaml", "toml" },
+-- Python Language Server
+vim.lsp.config("pyright", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = { "python" },
 })
-vim.keymap.set("i", "<C-s>", vim.cmd.Prettier)
+
+-- CSS Language Server
+vim.lsp.config("cssls", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		css = {
+			lint = {
+				unknownAtRules = "ignore", -- Don't warn about CSS custom properties
+			},
+		},
+	},
+})
+
+-- TOML/YAML Language Server
+vim.lsp.config("taplo", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = { "toml" },
+})
+
+-- Docker Language Server
+vim.lsp.config("dockerls", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+})
+
+-- Dockerfile Language Server
+vim.lsp.config("docker_compose_language_service", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+})
+
+-- ============================================================================
+-- ENABLE LSP SERVERS
+-- ============================================================================
+-- Neovim 0.11+ requires explicitly enabling servers after configuration
+
+vim.lsp.enable("lua_ls")
+vim.lsp.enable("ts_ls")
+vim.lsp.enable("eslint")
+vim.lsp.enable("rust_analyzer")
+vim.lsp.enable("clangd")
+vim.lsp.enable("marksman")
+vim.lsp.enable("pyright")
+vim.lsp.enable("cssls")
+vim.lsp.enable("taplo")
+vim.lsp.enable("dockerls")
+vim.lsp.enable("docker_compose_language_service")
+
+-- ============================================================================
+-- NULL-LS SETUP - Formatting and Linting
+-- ============================================================================
 
 local null_ls = require("null-ls")
 
-local group = vim.api.nvim_create_augroup("lsp_format_on_save", { clear = false })
-local event = "BufWritePre" -- or "BufWritePost"
-local async = event == "BufWritePost"
-
 null_ls.setup({
-    sources = {
+	sources = {
+		-- Prettier for JavaScript/TypeScript/JSON/CSS/HTML/Markdown
+		null_ls.builtins.formatting.prettier.with({
+			filetypes = {
+				"javascript",
+				"typescript",
+				"javascriptreact",
+				"typescriptreact",
+				"json",
+				"css",
+				"scss",
+				"html",
+				"markdown",
+				"yaml",
+			},
+		}),
+	},
+	on_attach = function(client, bufnr)
+		-- Format on Ctrl-S in insert mode
+		if client.supports_method("textDocument/formatting") then
+			vim.keymap.set("i", "<C-s>", function()
+				vim.lsp.buf.format({ bufnr = bufnr })
+			end, { buffer = bufnr, desc = "Format file" })
+		end
 
-        null_ls.builtins.formatting.prettier.with({
-            filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json", "css", "scss", "markdown", "yaml", "html" },
-        }),
-
-    },
-    on_attach = function(client, bufnr)
-        if client.supports_method("textDocument/formatting") then
-            vim.keymap.set("i", "<C-s>", function()
-                vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
-            end, { buffer = bufnr, desc = "[lsp] format" })
-            -- format on save
-            --vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
-            --vim.api.nvim_create_autocmd(event, {
-            --buffer = bufnr,
-            --group = group,
-            --callback = function()
-            --vim.lsp.buf.format({ bufnr = bufnr, async = async })
-            --end,
-            --desc = "[lsp] format on save",
-            --})
-        end
-
-        if client.supports_method("textDocument/rangeFormatting") then
-            vim.keymap.set("x", "<Leader>f", function()
-                vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
-            end, { buffer = bufnr, desc = "[lsp] format" })
-        end
-    end,
+		-- Format visual selection
+		if client.supports_method("textDocument/rangeFormatting") then
+			vim.keymap.set("x", "<Leader>f", function()
+				vim.lsp.buf.format({ bufnr = bufnr })
+			end, { buffer = bufnr, desc = "Format selection" })
+		end
+	end,
 })
 
--- recognizing gohtml files as html
-local goHtmlFileType = vim.api.nvim_create_augroup('filetype_gohtml', { clear = true })
-vim.api.nvim_create_autocmd('filetype', {
-    group = goHtmlFileType,
-    pattern = '.gohtml',
-    callback = function()
-        vim.bo.filetype = 'html'
-    end
+-- ============================================================================
+-- PRETTIER SETUP
+-- ============================================================================
+
+require("prettier").setup({
+	bin = "prettier",
+	filetypes = {
+		"css",
+		"graphql",
+		"html",
+		"javascript",
+		"javascriptreact",
+		"json",
+		"less",
+		"markdown",
+		"scss",
+		"typescript",
+		"typescriptreact",
+		"yaml",
+	},
 })
 
-local prettier = require("prettier")
+-- ============================================================================
+-- FILETYPE ASSOCIATIONS
+-- ============================================================================
 
-prettier.setup({
-    bin = 'prettier', -- or `'prettierd'` (v0.23.3+)
-    filetypes = {
-        "css",
-        "graphql",
-        "html",
-        "javascript",
-        "javascriptreact",
-        "json",
-        "less",
-        "markdown",
-        "scss",
-        "typescript",
-        "typescriptreact",
-        "yaml",
-    },
+-- Recognize .gohtml files as HTML for LSP
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = "*.gohtml",
+	callback = function()
+		vim.bo.filetype = "html"
+	end,
+	desc = "Treat .gohtml files as HTML",
 })
 
-vim.lsp.config("docker_language_server", {})
+-- ============================================================================
+-- DIAGNOSTIC CONFIGURATION
+-- ============================================================================
 
--- vim.api.nvim_create_autocmd("BufWritePre", {
---     pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
---     callback = function()
---         require("prettier").format()
---     end,
+-- Configure diagnostic display (optional - uncomment to customize)
+-- vim.diagnostic.config({
+--     virtual_text = false,  -- Disable inline diagnostic messages
+--     underline = true,      -- Underline diagnostics
+--     signs = true,          -- Show signs in sign column
+--     update_in_insert = false,  -- Don't update diagnostics while typing
 -- })
+
+-- ============================================================================
+-- DIAGNOSTIC CONFIGURATION - Virtual Text (Ghost Text)
+-- ============================================================================
+
+vim.diagnostic.config({
+	-- Virtual text (ghost text) configuration
+	virtual_text = {
+		-- Show source of diagnostic (e.g., [eslint], [lua_ls])
+		source = "if_many",
+
+		-- Prefix diagnostic with icon
+		prefix = "●",
+
+		-- Only show virtual text for errors and warnings (not hints/info)
+		severity = {
+			min = vim.diagnostic.severity.WARN,
+		},
+
+		-- Format the virtual text
+		format = function(diagnostic)
+			return string.format("%s (%s)", diagnostic.message, diagnostic.source)
+		end,
+	},
+
+	-- Don't underline diagnostics
+	underline = false,
+
+	-- Configure diagnostic signs in the gutter (modern Neovim 0.11+ way)
+	signs = {
+		text = {
+			[vim.diagnostic.severity.ERROR] = " ",
+			[vim.diagnostic.severity.WARN] = " ",
+			[vim.diagnostic.severity.HINT] = " ",
+			[vim.diagnostic.severity.INFO] = " ",
+		},
+	},
+
+	-- Don't update diagnostics while typing (reduces noise)
+	update_in_insert = false,
+
+	-- Sort diagnostics by severity (errors first)
+	severity_sort = true,
+
+	-- Configure floating window for diagnostics
+	float = {
+		border = "rounded",
+		source = "always", -- Always show source
+		header = "",
+		prefix = "",
+	},
+})
+
+-- Customize diagnostic signs in the gutter
+local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+for type, icon in pairs(signs) do
+	local hl = "DiagnosticSign" .. type
+	vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end
+
+-- If you want MORE detailed ghost text (show ALL diagnostics including hints):
+
+-- virtual_text = {
+--     source = "if_many",
+--     prefix = "●",
+--     -- Remove severity filter to show all diagnostics
+-- },
+
+-- If you want LESS noise (only errors, not warnings):
+
+-- virtual_text = {
+--     source = "if_many",
+--     prefix = "●",
+--     severity = {
+--         min = vim.diagnostic.severity.ERROR,  -- Only show errors
+--     },
+-- },
