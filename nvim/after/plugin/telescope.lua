@@ -1,3 +1,12 @@
+-- ============================================================================
+-- TELESCOPE - Fuzzy Finder
+-- ============================================================================
+-- Telescope is a highly extendable fuzzy finder over lists.
+-- Used for finding files, live grep, git integration, and more.
+--
+-- Repo: https://github.com/nvim-telescope/telescope.nvim
+-- ============================================================================
+
 local telescope = require('telescope')
 local builtin = require('telescope.builtin')
 
@@ -50,6 +59,6 @@ vim.keymap.set("n", "<leader>ed", function()
 end, { desc = '[e]dit [d]otfiles' })
 
 vim.keymap.set("n", "<leader>cdcd", function()
-    builtin.find_files({ cwd = "~/programming/work/codedex/", prompt = "nvim config files" })
+    builtin.find_files({ cwd = "~/programming/work/codedex/", prompt = "codedex quick search files" })
 end, { desc = 'cd to codedex' })
 
