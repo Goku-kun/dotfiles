@@ -1,4 +1,14 @@
-require 'nvim-treesitter.configs'.setup {
+-- ============================================================================
+-- TREESITTER CONFIGURATION
+-- ============================================================================
+-- nvim-treesitter provides advanced syntax highlighting and code manipulation
+-- using tree-sitter parsers. This config enables highlighting, text objects,
+-- refactoring, and auto-tagging features.
+--
+-- Repo: https://github.com/nvim-treesitter/nvim-treesitter
+-- ============================================================================
+
+require("nvim-treesitter.configs").setup({
     -- A list of parser names, or "all"
     ensure_installed = { "c", "lua", "rust", "javascript", "typescript", "html", "css", "tsx" },
 
@@ -31,27 +41,25 @@ require 'nvim-treesitter.configs'.setup {
                 ["af"] = "@function.outer",
                 ["if"] = "@function.inner",
                 ["ac"] = "@class.outer",
-                ["ap "] = "@parameter.outer",
-                ["ip "] = "@parameter.inner",
-                ["as "] = "@statement.outer",
-                ["is "] = "@statement.inner",
-                ["ab "] = "@block.outer",
-                ["ib "] = "@block.inner",
-                ["al "] = "@loop.outer",
-                ["il "] = "@loop.inner",
-                ["ac "] = "@conditional.outer",
-                ["ic "] = "@conditional.inner",
-                ["ao "] = "@operator.outer",
-                ["io "] = "@operator.inner",
-                ["at "] = "@comment.outer",
-                ["it "] = "@comment.inner",
-                ["av "] = "@variable.outer",
-                ["iv "] = "@variable.inner",
-                -- You can optionally set descriptions to the mappings (used in the desc parameter of
-                -- nvim_buf_set_keymap) which plugins like which-key display
                 ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-                -- You can also use captures from other query groups like `locals.scm`
-                ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
+                ["ap"] = "@parameter.outer",
+                ["ip"] = "@parameter.inner",
+                ["as"] = "@statement.outer",
+                ["is"] = "@statement.inner",
+                ["ab"] = "@block.outer",
+                ["ib"] = "@block.inner",
+                ["al"] = "@loop.outer",
+                ["il"] = "@loop.inner",
+                ["aK"] = "@conditional.outer", -- Changed from "ac " to "aK" to avoid conflict
+                ["iK"] = "@conditional.inner", -- Changed from "ic " to "iK" to avoid conflict
+                ["ao"] = "@operator.outer",
+                ["io"] = "@operator.inner",
+                ["at"] = "@comment.outer",
+                ["it"] = "@comment.inner",
+                ["av"] = "@variable.outer",
+                ["iv"] = "@variable.inner",
+                -- Scope selection
+                ["asc"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
             },
             -- You can choose the select mode (default is charwise 'v')
             --
@@ -61,10 +69,10 @@ require 'nvim-treesitter.configs'.setup {
             -- and should return the mode ('v', 'V', or '<c-v>') or a table
             -- mapping query_strings to modes.
             selection_modes = {
-                ['@parameter.outer'] = 'v', -- charwise
-                ['@parameter.inner'] = 'v', -- charwise
-                ['@function.outer'] = 'V',  -- linewise
-                ['@class.outer'] = '<c-v>', -- blockwise
+                ["@parameter.outer"] = "v", -- charwise
+                ["@parameter.inner"] = "v", -- charwise
+                ["@function.outer"] = "V", -- linewise
+                ["@class.outer"] = "<c-v>", -- blockwise
             },
             -- If you set this to `true` (default is `false`) then any textobject is
             -- extended to include preceding or succeeding whitespace. Succeeding
@@ -104,10 +112,10 @@ require 'nvim-treesitter.configs'.setup {
     },
     disable = function(lang, buf)
         local max_filesize = 100 * 1024 -- 100 KB
-        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
         if ok and stats and stats.size > max_filesize then
             return true
         end
         return false
     end,
-}
+})
