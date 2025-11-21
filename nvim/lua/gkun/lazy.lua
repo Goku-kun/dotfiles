@@ -23,31 +23,29 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
     -- Telescope for fuzzy finding - lazy-loaded on command and keybindings
     {
-        "nvim-telescope/telescope.nvim",
-        cmd = "Telescope",
-        tag = "0.1.8",
-        keys = {
-            { "<leader>ff",   desc = "Find files" },
-            { "<leader>fg",   desc = "Live grep" },
-            { "<leader>fb",   desc = "Find buffers" },
-            { "<leader>fh",   desc = "Find help" },
-            { "<leader>fd",   desc = "Find diagnostics" },
-            { "<leader>gcp",  desc = "Git commit picker" },
-            { "<leader>gbp",  desc = "Git branch picker" },
-            { "<leader>gsp",  desc = "Git stash picker" },
-            { "<leader>:",    desc = "Command history" },
-            { "<leader>km",   desc = "Keymaps" },
-            { "<leader>/",    desc = "Fuzzy find buffer" },
-            { "<leader>ed",   desc = "Edit dotfiles" },
-            { "<leader>cdcd", desc = "CD to codedex" },
-            { "<C-p>",        desc = "Git files" },
+        "nvim-lualine/lualine.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        event = "VeryLazy",
+        opts = {
+            options = {
+                theme = "oceanicnext",
+                section_separators = "",
+                component_separators = "",
+                globalstatus = true, -- Single statusline at bottom
+            },
+            sections = {
+                lualine_a = { "mode" },
+                lualine_b = { "branch", "diff", "diagnostics" },
+                -- show the full file path for the current file
+                lualine_c = { { "filename", path = 1 } },
+                lualine_x = { "encoding", "fileformat", "filetype" },
+                lualine_y = { "progress" },
+                lualine_z = { "location" },
+            },
+            extensions = { "fugitive", "nerdtree" },
         },
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-live-grep-args.nvim" },
-        config = function()
-            require("telescope").load_extension("live_grep_args")
-        end,
     },
-
+        
     -- OceanicNext Theme installation (config in colors.lua)
     { "mhartington/oceanic-next" },
 
