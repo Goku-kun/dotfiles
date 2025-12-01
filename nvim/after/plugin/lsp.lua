@@ -88,60 +88,107 @@ cmp.setup({
 })
 
 -- ============================================================================
--- LSP KEYBINDINGS - Attached to every buffer with LSP
+-- LSP KEYBINDINGS - Using LspAttach autocommand (Neovim 0.11+ recommended)
 -- ============================================================================
 
--- This function is called whenever an LSP attaches to a buffer
-local function on_attach(client, bufnr)
-	local opts = { buffer = bufnr, remap = false }
+-- This autocommand fires whenever ANY LSP client attaches to a buffer
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+	callback = function(ev)
+		local bufnr = ev.buf
+		local opts = { buffer = bufnr, remap = false }
 
-	-- Jump to definition/declaration
-	vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
-	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
-	vim.keymap.set(
-		"n",
-		"gi",
-		vim.lsp.buf.implementation,
-		vim.tbl_extend("force", opts, { desc = "Go to implementation" })
-	)
+		-- Jump to definition/declaration
+		vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+		vim.keymap.set(
+			"n",
+			"gD",
+			vim.lsp.buf.declaration,
+			vim.tbl_extend("force", opts, { desc = "Go to declaration" })
+		)
+		vim.keymap.set(
+			"n",
+			"gi",
+			vim.lsp.buf.implementation,
+			vim.tbl_extend("force", opts, { desc = "Go to implementation" })
+		)
 
-	-- Hover and signature help
-	vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
-	vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
+		-- Hover and signature help
+		vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
+		vim.keymap.set(
+			"i",
+			"<C-h>",
+			vim.lsp.buf.signature_help,
+			vim.tbl_extend("force", opts, { desc = "Signature help" })
+		)
 
-	-- Workspace and document symbols
-	vim.keymap.set(
-		"n",
-		"<leader>ls",
-		vim.lsp.buf.document_symbol,
-		vim.tbl_extend("force", opts, { desc = "Document symbols" })
-	)
-	vim.keymap.set(
-		"n",
-		"<leader>lws",
-		vim.lsp.buf.workspace_symbol,
-		vim.tbl_extend("force", opts, { desc = "Workspace symbols" })
-	)
+		-- Workspace and document symbols
+		vim.keymap.set(
+			"n",
+			"<leader>ls",
+			vim.lsp.buf.document_symbol,
+			vim.tbl_extend("force", opts, { desc = "Document symbols" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lws",
+			vim.lsp.buf.workspace_symbol,
+			vim.tbl_extend("force", opts, { desc = "Workspace symbols" })
+		)
 
-	-- Diagnostics
-	vim.keymap.set(
-		"n",
-		"<leader>ld",
-		vim.diagnostic.open_float,
-		vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
-	)
-	vim.keymap.set("n", "[d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
-	vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
+		-- Diagnostics
+		vim.keymap.set(
+			"n",
+			"<leader>ld",
+			vim.diagnostic.open_float,
+			vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
+		)
+		vim.keymap.set("n", "[d", vim.diagnostic.get_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+		vim.keymap.set(
+			"n",
+			"]d",
+			vim.diagnostic.get_prev,
+			vim.tbl_extend("force", opts, { desc = "Previous diagnostic" })
+		)
 
-	-- Code actions and refactoring
-	vim.keymap.set("n", "<leader>lca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
-	vim.keymap.set("n", "<leader>lrr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "References" }))
-	vim.keymap.set("n", "<leader>lrn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
+		-- Code actions and refactoring
+		vim.keymap.set(
+			"n",
+			"<leader>lca",
+			vim.lsp.buf.code_action,
+			vim.tbl_extend("force", opts, { desc = "Code action" })
+		)
+		vim.keymap.set("n", "<leader>lrr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "References" }))
+		vim.keymap.set("n", "<leader>lrn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
 
-	-- Formatting
-	vim.keymap.set("n", "<leader>fp", vim.lsp.buf.format, vim.tbl_extend("force", opts, { desc = "Format file" }))
-	vim.keymap.set("n", "<space>pp", vim.lsp.buf.format, vim.tbl_extend("force", opts, { desc = "Format file" }))
-end
+		-- Formatting (Prettier for JS/TS, LSP for others)
+		local prettier_filetypes = {
+			javascript = true,
+			javascriptreact = true,
+			typescript = true,
+			typescriptreact = true,
+            json = true,
+		}
+
+		local function format_buffer()
+			local ft = vim.bo[bufnr].filetype
+			if prettier_filetypes[ft] then
+				-- Use null-ls (Prettier) for JS/TS files
+				vim.lsp.buf.format({
+					bufnr = bufnr,
+					filter = function(client)
+						return client.name == "null-ls"
+					end,
+				})
+			else
+				vim.lsp.buf.format({ bufnr = bufnr })
+			end
+		end
+
+		vim.keymap.set("n", "<leader>fp", format_buffer, vim.tbl_extend("force", opts, { desc = "Format file" }))
+		vim.keymap.set("n", "<space>pp", format_buffer, vim.tbl_extend("force", opts, { desc = "Format file" }))
+	end,
+})
 
 -- ============================================================================
 -- LSP SERVER CONFIGURATIONS - Native Neovim 0.11 API
@@ -153,7 +200,6 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 -- Lua Language Server (for Neovim config)
 vim.lsp.config("lua_ls", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	settings = {
 		Lua = {
 			runtime = {
@@ -176,7 +222,6 @@ vim.lsp.config("lua_ls", {
 -- TypeScript/JavaScript Language Server
 vim.lsp.config("ts_ls", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	filetypes = {
 		"javascript",
 		"javascriptreact",
@@ -190,13 +235,11 @@ vim.lsp.config("ts_ls", {
 -- ESLint Language Server
 vim.lsp.config("eslint", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 })
 
 -- Rust Analyzer
 vim.lsp.config("rust_analyzer", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	settings = {
 		["rust-analyzer"] = {
 			checkOnSave = {
@@ -209,28 +252,24 @@ vim.lsp.config("rust_analyzer", {
 -- C/C++ Language Server (clangd)
 vim.lsp.config("clangd", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
 })
 
 -- Markdown Language Server
 vim.lsp.config("marksman", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	filetypes = { "markdown" },
 })
 
 -- Python Language Server
 vim.lsp.config("pyright", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	filetypes = { "python" },
 })
 
 -- CSS Language Server
 vim.lsp.config("cssls", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	settings = {
 		css = {
 			lint = {
@@ -243,20 +282,24 @@ vim.lsp.config("cssls", {
 -- TOML/YAML Language Server
 vim.lsp.config("taplo", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	filetypes = { "toml" },
 })
 
 -- Docker Language Server
 vim.lsp.config("dockerls", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 })
 
 -- Dockerfile Language Server
 vim.lsp.config("docker_compose_language_service", {
 	capabilities = capabilities,
-	on_attach = on_attach,
+})
+
+-- Dart Language Server
+vim.lsp.config("dartls", {
+	capabilities = capabilities,
+	cmd = { "dart", "language-server", "--protocol=lsp" },
+	filetypes = { "dart" },
 })
 
 -- ============================================================================
@@ -275,6 +318,7 @@ vim.lsp.enable("cssls")
 vim.lsp.enable("taplo")
 vim.lsp.enable("dockerls")
 vim.lsp.enable("docker_compose_language_service")
+vim.lsp.enable("dartls")
 
 -- ============================================================================
 -- NULL-LS SETUP - Formatting and Linting
