@@ -87,15 +87,6 @@ end, {
     desc = "Copy file path to clipboard",
 })
 
--- Copy full file path to clipboard
-vim.keymap.set("n", "<leader>cp", function()
-    local filepath = vim.fn.expand("%:p")
-    vim.fn.setreg("+", filepath)
-    print("Copied file path to clipboard: " .. filepath)
-end, {
-    desc = "Copy file path to clipboard",
-})
-
 -- ============================================================================
 -- QUICKFIX AND LOCATION LIST NAVIGATION
 -- ============================================================================
