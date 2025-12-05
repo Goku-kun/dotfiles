@@ -68,4 +68,4 @@ telescope.load_extension("live_grep_args")
 -- Flutter extension setup
 vim.keymap.set("n", "<leader>fc", function()
 	telescope.extensions.flutter.commands()
-end, { desc = "[f]lutter [F]ramework commands" })
+end, { desc = "[f]lutter [c]ommands" })

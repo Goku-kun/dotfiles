@@ -96,7 +96,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
 	callback = function(ev)
 		local bufnr = ev.buf
+		local client = vim.lsp.get_client_by_id(ev.data.client_id)
 		local opts = { buffer = bufnr, remap = false }
+
 
 		-- Jump to definition/declaration
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
@@ -143,11 +145,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.diagnostic.open_float,
 			vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
 		)
-		vim.keymap.set("n", "[d", vim.diagnostic.get_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+		vim.keymap.set("n", "[d", vim.diagnostic.goto_next
+        , vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 		vim.keymap.set(
 			"n",
 			"]d",
-			vim.diagnostic.get_prev,
+			vim.diagnostic.goto_prev,
 			vim.tbl_extend("force", opts, { desc = "Previous diagnostic" })
 		)
 
@@ -295,11 +298,24 @@ vim.lsp.config("docker_compose_language_service", {
 	capabilities = capabilities,
 })
 
--- Dart Language Server
+-- Dart Language Server (supports Dart and Flutter projects)
 vim.lsp.config("dartls", {
 	capabilities = capabilities,
 	cmd = { "dart", "language-server", "--protocol=lsp" },
 	filetypes = { "dart" },
+	init_options = {
+		closingLabels = true,
+		flutterOutline = true,
+		onlyAnalyzeProjectsWithOpenFiles = true,
+		outline = true,
+		suggestFromUnimportedLibraries = true,
+	},
+	settings = {
+		dart = {
+			completeFunctionCalls = true,
+			showTodos = true,
+		},
+	},
 })
 
 -- ============================================================================

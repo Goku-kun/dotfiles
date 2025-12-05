@@ -105,6 +105,67 @@ vim.opt.lazyredraw = true  -- Only redraw when needed
 vim.opt.redrawtime = 10000 -- Allow more time for redraws
 
 -- ============================================================================
+-- FOLDING
+-- ============================================================================
+-- Treesitter-based code folding for functions, classes, blocks, etc.
+-- Works with any language that has a treesitter parser installed.
+--
+-- Keybindings (built-in vim):
+--   za    Toggle fold under cursor
+--   zc    Close fold under cursor
+--   zo    Open fold under cursor
+--   zM    Close all folds in file
+--   zR    Open all folds in file
+--   zj/zk Jump to next/previous fold
+--
+-- Note: LSP folding (vim.lsp.foldexpr) was tested but has timing issues
+-- with some servers like dartls. Treesitter folding is more reliable.
+-- ============================================================================
+
+vim.opt.foldmethod = "expr"                          -- Use expression for folding
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- Treesitter-based folding
+vim.opt.foldlevelstart = 99                          -- Open all folds by default
+vim.opt.foldlevel = 99                               -- Keep folds open
+vim.opt.foldenable = true                            -- Enable folding
+
+-- ============================================================================
+-- STATUSCOLUMN
+-- ============================================================================
+-- Minimal statuscolumn with dim fold indicators.
+-- Layout: [signs] [line number] [fold icon] [space]
+--
+-- Fold icons:
+--   ›  Fold is open (can be closed with zc)
+--   ‹  Fold is closed (can be opened with zo)
+--
+-- Customization:
+--   - Change "Comment" to "NonText" for even dimmer icons
+--   - Change › and ‹ to other characters (e.g., ▸/▾ or ●/○)
+-- ============================================================================
+
+-- Dim fold indicator highlight (theme-adaptive, links to Comment)
+vim.api.nvim_set_hl(0, "FoldIndicator", { link = "Comment" })
+
+-- Statuscolumn function: signs + line number + subtle fold chevron
+_G.StatusColumn = function()
+	local lnum = vim.v.lnum
+
+	-- Fold indicator (dim chevron)
+	local fold = " "
+	if vim.fn.foldlevel(lnum) > vim.fn.foldlevel(lnum - 1) then
+		if vim.fn.foldclosed(lnum) == -1 then
+			fold = "%#FoldIndicator#›%*" -- open fold
+		else
+			fold = "%#FoldIndicator#‹%*" -- closed fold
+		end
+	end
+
+	return "%s%l " .. fold .. " "
+end
+
+vim.opt.statuscolumn = "%!v:lua.StatusColumn()"
+
+-- ============================================================================
 -- PYTHON PROVIDERS
 -- ============================================================================
 
