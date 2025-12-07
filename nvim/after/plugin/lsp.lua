@@ -99,7 +99,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
 		local opts = { buffer = bufnr, remap = false }
 
-
 		-- Jump to definition/declaration
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
 		vim.keymap.set(
@@ -145,8 +144,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.diagnostic.open_float,
 			vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
 		)
-		vim.keymap.set("n", "[d", vim.diagnostic.goto_next
-        , vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+		vim.keymap.set("n", "[d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 		vim.keymap.set(
 			"n",
 			"]d",
@@ -161,8 +159,21 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.lsp.buf.code_action,
 			vim.tbl_extend("force", opts, { desc = "Code action" })
 		)
-		vim.keymap.set("n", "<leader>lrr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "References" }))
+		vim.keymap.set(
+			"n",
+			"<leader>lrr",
+			vim.lsp.buf.references,
+			vim.tbl_extend("force", opts, { desc = "References" })
+		)
 		vim.keymap.set("n", "<leader>lrn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
+
+		-- All diagnostics in a quickfix list
+		vim.keymap.set(
+			"n",
+			"<leader>ll",
+			vim.diagnostic.setqflist,
+			vim.tbl_extend("force", opts, { desc = "All diagnostics to quickfix list" })
+		)
 
 		-- Formatting (Prettier for JS/TS, LSP for others)
 		local prettier_filetypes = {
@@ -170,7 +181,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			javascriptreact = true,
 			typescript = true,
 			typescriptreact = true,
-            json = true,
+			json = true,
 		}
 
 		local function format_buffer()
