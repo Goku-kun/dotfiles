@@ -13,6 +13,7 @@
   "delimitmate": { "branch": "master", "commit": "becbd2d353a2366171852387288ebb4b33a02487" },
   "dressing.nvim": { "branch": "master", "commit": "2d7c2db2507fa3c4956142ee607431ddb2828639" },
   "edge": { "branch": "master", "commit": "4145071bb0ea909511fa9a444eec80367b11296f" },
+  "flutter-bloc.nvim": { "branch": "main", "commit": "691da474a32b65b1b808e679c73c320b122159fe" },
   "flutter-tools.nvim": { "branch": "main", "commit": "c7dfaa9ccca008fbc55ca0b4e5d9ef80e0248902" },
   "friendly-snippets": { "branch": "main", "commit": "572f5660cf05f8cd8834e096d7b4c921ba18e175" },
   "git-worktree.nvim": { "branch": "main", "commit": "3ad8c17a3d178ac19be925284389c14114638ebb" },
