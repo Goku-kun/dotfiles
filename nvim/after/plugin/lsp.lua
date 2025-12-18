@@ -31,8 +31,8 @@ require("mason-lspconfig").setup({
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
--- Load friendly-snippets
-require("luasnip.loaders.from_vscode").lazy_load()
+-- Note: LuaSnip is now configured in after/plugin/luasnip.lua
+-- We only need cmp integration here
 
 cmp.setup({
 	snippet = {
@@ -55,14 +55,14 @@ cmp.setup({
 		["<S-Tab>"] = nil,
 	}),
 
-	-- Completion sources (order matters)
+	-- Completion sources (order matters - higher priority first)
 	sources = cmp.config.sources({
-		{ name = "nvim_lsp" }, -- LSP completions
-		{ name = "nvim_lua" }, -- Neovim Lua API completions
-		{ name = "luasnip" }, -- Snippet completions
-		{ name = "path" }, -- File path completions
+		{ name = "luasnip", priority = 1000 }, -- Snippet completions (highest)
+		{ name = "nvim_lsp", priority = 900 }, -- LSP completions
+		{ name = "nvim_lua", priority = 800 }, -- Neovim Lua API completions
+		{ name = "path", priority = 700 }, -- File path completions
 	}, {
-		{ name = "buffer", keyword_length = 3 }, -- Buffer completions (only after 3 chars)
+		{ name = "buffer", keyword_length = 3, priority = 500 }, -- Buffer completions
 	}),
 
 	-- Completion menu appearance
@@ -75,6 +75,37 @@ cmp.setup({
 	formatting = {
 		fields = { "kind", "abbr", "menu" },
 		format = function(entry, vim_item)
+			-- Kind icons (optional - you can customize these)
+			local kind_icons = {
+				Text = "",
+				Method = "󰆧",
+				Function = "󰊕",
+				Constructor = "",
+				Field = "󰇽",
+				Variable = "󰂡",
+				Class = "󰠱",
+				Interface = "",
+				Module = "",
+				Property = "󰜢",
+				Unit = "",
+				Value = "󰎠",
+				Enum = "",
+				Keyword = "󰌋",
+				Snippet = "",
+				Color = "󰏘",
+				File = "󰈙",
+				Reference = "",
+				Folder = "󰉋",
+				EnumMember = "",
+				Constant = "󰏿",
+				Struct = "",
+				Event = "",
+				Operator = "󰆕",
+				TypeParameter = "󰅲",
+			}
+
+			vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind] or "", vim_item.kind)
+
 			vim_item.menu = ({
 				nvim_lsp = "[LSP]",
 				nvim_lua = "[Lua]",
@@ -82,8 +113,14 @@ cmp.setup({
 				buffer = "[Buf]",
 				path = "[Path]",
 			})[entry.source.name]
+
 			return vim_item
 		end,
+	},
+
+	-- Experimental features
+	experimental = {
+		ghost_text = false, -- Conflicts with Copilot
 	},
 })
 

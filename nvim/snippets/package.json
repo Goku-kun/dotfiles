@@ -1,0 +1,6 @@
+{
+  "name": "custom-snippets",
+  "contributes": {
+    "snippets": []
+  }
+}

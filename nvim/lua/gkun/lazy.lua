@@ -288,7 +288,6 @@ require("lazy").setup({
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-nvim-lua",
 			"saadparwaiz1/cmp_luasnip",
-			"L3MON4D3/LuaSnip",
 			"rafamadriz/friendly-snippets",
 		},
 	},
@@ -302,6 +301,7 @@ require("lazy").setup({
 	-- Snippet engine
 	{
 		"L3MON4D3/LuaSnip",
+        version="v2.*",
 		lazy = true,
 		build = "make install_jsregexp",
 	},
