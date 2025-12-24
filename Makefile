@@ -8,6 +8,11 @@ ALACRITTY_SRC_DIR := ./alacritty
 ALACRITTY_DEST_DIR := $(HOME)/.config/alacritty
 
 
+ZSH_REPO_FILE := ./zsh/.zshrc
+ZSH_HOME_FILE := $(HOME)/.zshrc
+
+
+
 .PHONY: all setup_nvim setup_alacritty
 all: setup_nvim setup_alacritty
 
@@ -19,6 +24,10 @@ setup_alacritty:
 	mkdir -p $(ALACRITTY_DEST_DIR)
 	cp -r $(ALACRITTY_SRC_DIR)/* $(ALACRITTY_DEST_DIR)/
 	@echo "Alacritty configuration copied to $(ALACRITTY_DEST_DIR)"
+setup_zshrc: 
+	@echo "Copying from $(ZSH_REPO_FILE) $(ZSH_HOME_FILE)"
+	cp $(ZSH_REPO_FILE) $(ZSH_HOME_FILE)
+	@echo "Copied from $(ZSH_REPO_FILE) $(ZSH_HOME_FILE)"
 install_nvim_debian_root: setup_nvim
 	@echo "Installing Neovim on Debian as root..."
 	apt install ninja-build gettext cmake curl build-essential git
@@ -59,6 +68,11 @@ reverse_alacritty:
 	mkdir -p $(ALACRITTY_SRC_DIR)
 	cp -r $(ALACRITTY_DEST_DIR)/* $(ALACRITTY_SRC_DIR)/
 	echo "Alacritty configuration copied back to $(ALACRITTY_SRC_DIR)"
+reverse_zshrc:
+	@echo "Copying from $(ZSH_HOME_FILE) to $(ZSH_REPO_FILE)"
+	cp $(ZSH_HOME_FILE) $(ZSH_REPO_FILE)
+	@echo ".zshrc configuration copied to $(ZSH_REPO_FILE)"
+
 # install: all
 # 	# Additional installation steps can be added here if needed
 # 	@echo "Installation complete."
