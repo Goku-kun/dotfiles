@@ -144,3 +144,34 @@ if [ -f '/Users/goku-kun/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then 
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="/Users/goku-kun/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Antigravity
+export PATH="/Users/goku-kun/.antigravity/antigravity/bin:$PATH"
+
+# Flutter Path
+export PATH=$HOME/Library/flutter/bin:$PATH
+# Flutter Pub Cache Path for executables
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+# opencode
+export PATH=/Users/goku-kun/.opencode/bin:$PATH
+export OLLAMA_API_KEY=ENTER_KEY_HERE
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/3.4.0/bin:$PATH"
+
+## [Completion]
+## Completion scripts setup. Remove the following line to uninstall
+[[ -f /Users/goku-kun/.dart-cli-completion/zsh-config.zsh ]] && . /Users/goku-kun/.dart-cli-completion/zsh-config.zsh || true
+## [/Completion]
+
+alias cat='bat --paging=never'
+
