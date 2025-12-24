@@ -140,6 +140,9 @@ if [ -f '/Users/goku-kun/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Us
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/goku-kun/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/goku-kun/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
+# Postgres path
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
 # setup for android studio for using with React Native development
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator
