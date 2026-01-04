@@ -2,7 +2,7 @@
 -- LUASNIP CONFIGURATION
 -- ============================================================================
 -- Full-featured snippet engine setup with:
--- - Keybindings: <C-k> forward, <C-j> backward (insert mode)
+-- - Keybindings: <C-j> forward, <C-k> backward (insert mode)
 -- - Choice nodes integrated with nvim-cmp
 -- - Custom snippets from lua/gkun/snippets/ (Lua format)
 -- - Custom snippets from snippets/ (JSON/VSCode format)
@@ -49,15 +49,15 @@ ls.setup({
 -- KEYBINDINGS
 -- ============================================================================
 
--- Jump forward in snippet (<C-k> in insert/select mode)
-vim.keymap.set({ "i", "s" }, "<C-k>", function()
+-- Jump forward in snippet (<C-j> in insert/select mode)
+vim.keymap.set({ "i", "s" }, "<C-j>", function()
 	if ls.expand_or_jumpable() then
 		ls.expand_or_jump()
 	end
 end, { silent = true, desc = "LuaSnip: Expand or jump forward" })
 
--- Jump backward in snippet (<C-j> in insert/select mode)
-vim.keymap.set({ "i", "s" }, "<C-j>", function()
+-- Jump backward in snippet (<C-k> in insert/select mode)
+vim.keymap.set({ "i", "s" }, "<C-k>", function()
 	if ls.jumpable(-1) then
 		ls.jump(-1)
 	end
