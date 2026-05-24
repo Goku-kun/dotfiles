@@ -1,121 +1,139 @@
 -- ============================================================================
--- TREESITTER CONFIGURATION
+-- TREESITTER CONFIGURATION (Neovim 0.12+, nvim-treesitter main branch)
 -- ============================================================================
--- nvim-treesitter provides advanced syntax highlighting and code manipulation
--- using tree-sitter parsers. This config enables highlighting, text objects,
--- refactoring, and auto-tagging features.
+-- The main branch is a full rewrite. Setup is optional; highlighting,
+-- folding, and indentation are wired via FileType autocmds instead of the
+-- old `require("nvim-treesitter.configs").setup({...})` modules API.
 --
--- Repo: https://github.com/nvim-treesitter/nvim-treesitter
+-- Repo: https://github.com/nvim-treesitter/nvim-treesitter (branch: main)
 -- ============================================================================
 
-require("nvim-treesitter.configs").setup({
-    -- A list of parser names, or "all"
-    ensure_installed = { "c", "lua", "rust", "javascript", "typescript", "html", "css", "tsx" },
+local parsers = {
+	-- Languages
+	"c",
+	"lua",
+	"rust",
+	"javascript",
+	"typescript",
+	"tsx",
+	"python",
+	"go",
+	"dart",
+	-- Web
+	"html",
+	"css",
+	-- Data / config
+	"yaml",
+	"json",
+	"toml",
+	-- Docs
+	"markdown",
+	"markdown_inline",
+	"vimdoc",
+	-- Shell / build
+	"bash",
+	"make",
+	"cmake",
+	"dockerfile",
+	-- Vim / editor
+	"vim",
+	"query",
+	"regex",
+	-- Git
+	"gitignore",
+	"gitcommit",
+	"git_rebase",
+	"diff",
+}
 
-    -- Install parsers synchronously (only applied to `ensure_installed`)
-    sync_install = false,
+-- Install parsers asynchronously. No-op when already installed.
+require("nvim-treesitter").install(parsers)
 
-    -- Automatically install missing parsers when entering buffer
-    -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-    auto_install = true,
+-- Enable treesitter highlight, fold, and indent on FileType. Skip files
+-- larger than 100 KB to keep the editor responsive on huge buffers.
+local ts_group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
 
-    ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-    -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+vim.api.nvim_create_autocmd("FileType", {
+	group = ts_group,
+	callback = function(args)
+		local buf = args.buf
+		local max_filesize = 100 * 1024
 
-    highlight = {
-        -- `false` will disable the whole extension
-        enable = true,
-        -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-        -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-        -- Using this option may slow down your editor, and you may see some duplicate highlights.
-        -- Instead of true it can also be a list of languages
-        additional_vim_regex_highlighting = false,
-    },
-    textobjects = {
-        select = {
-            enable = true,
-            -- Automatically jump forward to textobj, similar to targets.vim
-            lookahead = true,
-            keymaps = {
-                -- You can use the capture groups defined in textobjects.scm
-                ["af"] = "@function.outer",
-                ["if"] = "@function.inner",
-                ["ac"] = "@class.outer",
-                ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-                ["ap"] = "@parameter.outer",
-                ["ip"] = "@parameter.inner",
-                ["as"] = "@statement.outer",
-                ["is"] = "@statement.inner",
-                ["ab"] = "@block.outer",
-                ["ib"] = "@block.inner",
-                ["al"] = "@loop.outer",
-                ["il"] = "@loop.inner",
-                ["aK"] = "@conditional.outer", -- Changed from "ac " to "aK" to avoid conflict
-                ["iK"] = "@conditional.inner", -- Changed from "ic " to "iK" to avoid conflict
-                ["ao"] = "@operator.outer",
-                ["io"] = "@operator.inner",
-                ["at"] = "@comment.outer",
-                ["it"] = "@comment.inner",
-                ["av"] = "@variable.outer",
-                ["iv"] = "@variable.inner",
-                -- Scope selection
-                ["asc"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-            },
-            -- You can choose the select mode (default is charwise 'v')
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * method: eg 'v' or 'o'
-            -- and should return the mode ('v', 'V', or '<c-v>') or a table
-            -- mapping query_strings to modes.
-            selection_modes = {
-                ["@parameter.outer"] = "v", -- charwise
-                ["@parameter.inner"] = "v", -- charwise
-                ["@function.outer"] = "V", -- linewise
-                ["@class.outer"] = "<c-v>", -- blockwise
-            },
-            -- If you set this to `true` (default is `false`) then any textobject is
-            -- extended to include preceding or succeeding whitespace. Succeeding
-            -- whitespace has priority in order to act similarly to eg the built-in
-            -- `ap`.
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * selection_mode: eg 'v'
-            -- and should return true of false
-            include_surrounding_whitespace = true,
-        },
-    },
-    -- Used to autocomplete tags in HTML, JSX, XML, etc.
-    autotag = {
-        enable = true,
-    },
-    refactor = {
-        highlight_definitions = { enable = true },
-        highlight_current_scope = { enable = false },
-        smart_rename = {
-            enable = true,
-            keymaps = {
-                smart_rename = "grr",
-            },
-        },
-        navigation = {
-            enable = true,
-            keymaps = {
-                goto_definition = "gnd",
-                list_definitions = "gnD",
-                list_definitions_toc = "gO",
-                goto_next_usage = "<a-*>",
-                goto_previous_usage = "<a-#>",
-            },
-        },
-    },
-    disable = function(lang, buf)
-        local max_filesize = 100 * 1024 -- 100 KB
-        local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-        if ok and stats and stats.size > max_filesize then
-            return true
-        end
-        return false
-    end,
+		local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+		if ok and stats and stats.size > max_filesize then
+			return
+		end
+
+		local started = pcall(vim.treesitter.start, buf)
+		if not started then
+			return
+		end
+
+		vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		vim.wo[0][0].foldmethod = "expr"
+		vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+	end,
 })
+
+-- ============================================================================
+-- TEXTOBJECTS (nvim-treesitter-textobjects main branch)
+-- ============================================================================
+-- The main branch removes the inline `keymaps` table. Configure `select`
+-- behavior here, then define keymaps explicitly with `select_textobject`.
+
+require("nvim-treesitter-textobjects").setup({
+	select = {
+		lookahead = true,
+		selection_modes = {
+			["@parameter.outer"] = "v",
+			["@parameter.inner"] = "v",
+			["@function.outer"] = "V",
+			["@class.outer"] = "<c-v>",
+		},
+		include_surrounding_whitespace = true,
+	},
+})
+
+local select_textobject = require("nvim-treesitter-textobjects.select").select_textobject
+
+local textobject_mappings = {
+	af = "@function.outer",
+	["if"] = "@function.inner",
+	ac = "@class.outer",
+	ic = "@class.inner",
+	ap = "@parameter.outer",
+	ip = "@parameter.inner",
+	as = "@statement.outer",
+	is = "@statement.inner",
+	ab = "@block.outer",
+	ib = "@block.inner",
+	al = "@loop.outer",
+	il = "@loop.inner",
+	aK = "@conditional.outer",
+	iK = "@conditional.inner",
+	ao = "@operator.outer",
+	io = "@operator.inner",
+	at = "@comment.outer",
+	it = "@comment.inner",
+	av = "@variable.outer",
+	iv = "@variable.inner",
+}
+
+for lhs, capture in pairs(textobject_mappings) do
+	vim.keymap.set({ "x", "o" }, lhs, function()
+		select_textobject(capture, "textobjects")
+	end, { desc = "Select " .. capture })
+end
+
+-- Language scope selection uses the `locals` query group.
+vim.keymap.set({ "x", "o" }, "asc", function()
+	select_textobject("@scope", "locals")
+end, { desc = "Select language scope" })
+
+-- ============================================================================
+-- AUTO-TAG (HTML/JSX/XML closing tags)
+-- ============================================================================
+-- nvim-ts-autotag is a separate plugin; on the main branch it must be set
+-- up directly rather than as a nested module in nvim-treesitter.configs.
+
+require("nvim-ts-autotag").setup({})

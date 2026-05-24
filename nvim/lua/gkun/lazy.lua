@@ -176,10 +176,12 @@ require("lazy").setup({
 		},
 	},
 
-	-- Treesitter for advanced syntax highlighting - lazy-loaded on file open
+	-- Treesitter (main-branch rewrite). Requires Neovim 0.12+. Config and
+	-- highlight wiring live in after/plugin/treesitter.lua.
 	{
 		"nvim-treesitter/nvim-treesitter",
-		event = { "BufReadPost", "BufNewFile" },
+		branch = "main",
+		lazy = false,
 		build = ":TSUpdate",
 	},
 	{
@@ -201,22 +203,41 @@ require("lazy").setup({
 	-- Used to select/swap/yank text objects in treesitter; see treesitter.lua for more
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		init = function()
+			vim.g.no_plugin_maps = true
+		end,
 	},
 
-	-- Treesitter refactor
+	-- Highlight references to the symbol under the cursor (replaces
+	-- nvim-treesitter-refactor's highlight_definitions, which is unmaintained
+	-- and broken on current Neovim).
 	{
-		"nvim-treesitter/nvim-treesitter-refactor",
-		after = "nvim-treesitter",
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		"RRethy/vim-illuminate",
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			require("illuminate").configure({
+				providers = { "lsp", "treesitter", "regex" },
+				delay = 100,
+				under_cursor = true,
+			})
+			vim.keymap.set("n", "<a-*>", function()
+				require("illuminate").goto_next_reference(false)
+			end, { desc = "Next reference (illuminate)" })
+			vim.keymap.set("n", "<a-#>", function()
+				require("illuminate").goto_prev_reference(false)
+			end, { desc = "Prev reference (illuminate)" })
+		end,
 	},
 	-- Used to autocomplete tags in HTML, JSX, XML, etc.
 	{
 		"windwp/nvim-ts-autotag",
-		after = "nvim-treesitter",
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 	},
-	{ "nvim-treesitter/playground" },
+	-- nvim-treesitter/playground was removed: Neovim 0.10+ ships `:InspectTree`
+	-- and `:Inspect` natively, and the plugin uses the old modules API which is
+	-- incompatible with the main-branch rewrite.
 	{ "theprimeagen/harpoon" },
 
 	-- Indentation guide for treesitter
@@ -247,7 +268,7 @@ require("lazy").setup({
 	--     },
 	-- },
 
-	{ "ggandor/leap.nvim" },
+	{ url = "https://codeberg.org/andyg/leap.nvim" },
 
 	-- LSP support
 	-- LSP: Mason for package management
@@ -301,7 +322,7 @@ require("lazy").setup({
 	-- Snippet engine
 	{
 		"L3MON4D3/LuaSnip",
-        version="v2.*",
+		version = "v2.*",
 		lazy = true,
 		build = "make install_jsregexp",
 	},
@@ -352,10 +373,10 @@ require("lazy").setup({
 		},
 	},
 
-	{
-		"github/copilot.vim",
-		event = "InsertEnter",
-	},
+	-- {
+	-- 	"github/copilot.vim",
+	-- 	event = "InsertEnter",
+	-- },
 
 	{
 		"numToStr/Comment.nvim",

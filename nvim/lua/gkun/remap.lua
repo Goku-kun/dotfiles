@@ -11,13 +11,13 @@
 
 -- Jump between window splits
 vim.keymap.set("n", "<C-h>", "<C-w>h", {
-    noremap = true,
-    desc = "Move to left window",
+	noremap = true,
+	desc = "Move to left window",
 })
 
 vim.keymap.set("n", "<C-l>", "<C-w>l", {
-    noremap = true,
-    desc = "Move to right window",
+	noremap = true,
+	desc = "Move to right window",
 })
 
 -- ============================================================================
@@ -26,12 +26,19 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", {
 
 -- Move selected lines up/down with automatic re-indentation
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", {
-    desc = "Move selection down",
+	desc = "Move selection down",
 })
 
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", {
-    desc = "Move selection up",
+	desc = "Move selection up",
 })
+
+-- ============================================================================
+-- Toggle Line Wrapping
+-- ============================================================================
+vim.keymap.set("n", "<leader>,", function()
+    vim.wo.wrap = not vim.wo.wrap
+end, { desc = "Toggle line wrapping" })
 
 -- ============================================================================
 -- NORMAL MODE IMPROVEMENTS
@@ -39,7 +46,7 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", {
 
 -- Join line below without moving cursor
 vim.keymap.set("n", "J", "mzJ`z", {
-    desc = "Join line below",
+	desc = "Join line below",
 })
 
 -- ============================================================================
@@ -48,20 +55,20 @@ vim.keymap.set("n", "J", "mzJ`z", {
 
 -- Half-page scroll with cursor in middle
 vim.keymap.set("n", "<C-d>", "<C-d>zz", {
-    desc = "Scroll down (centered)",
+	desc = "Scroll down (centered)",
 })
 
 vim.keymap.set("n", "<C-u>", "<C-u>zz", {
-    desc = "Scroll up (centered)",
+	desc = "Scroll up (centered)",
 })
 
 -- Search navigation with cursor in middle
 vim.keymap.set("n", "n", "nzzzv", {
-    desc = "Next search result (centered)",
+	desc = "Next search result (centered)",
 })
 
 vim.keymap.set("n", "N", "Nzzzv", {
-    desc = "Previous search result (centered)",
+	desc = "Previous search result (centered)",
 })
 
 -- ============================================================================
@@ -70,21 +77,21 @@ vim.keymap.set("n", "N", "Nzzzv", {
 
 -- Paste over selection without yanking deleted text
 vim.keymap.set("x", "<leader>p", [["_dP]], {
-    desc = "Paste without yanking",
+	desc = "Paste without yanking",
 })
 
 -- Delete to black hole register (don't yank)
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], {
-    desc = "Delete without yanking",
+	desc = "Delete without yanking",
 })
 
 -- Copy full file path to clipboard
 vim.keymap.set("n", "<leader>cp", function()
-    local filepath = vim.fn.expand("%:p")
-    vim.fn.setreg("+", filepath)
-    print("Copied file path to clipboard: " .. filepath)
+	local filepath = vim.fn.expand("%:p")
+	vim.fn.setreg("+", filepath)
+	print("Copied file path to clipboard: " .. filepath)
 end, {
-    desc = "Copy file path to clipboard",
+	desc = "Copy file path to clipboard",
 })
 
 -- ============================================================================
@@ -93,20 +100,20 @@ end, {
 
 -- Navigate quickfix list (compilation errors, grep results, etc.)
 vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", {
-    desc = "Next quickfix item",
+	desc = "Next quickfix item",
 })
 
 vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", {
-    desc = "Previous quickfix item",
+	desc = "Previous quickfix item",
 })
 
 -- Navigate location list (buffer-local errors/references)
 vim.keymap.set("n", "<leader>j", "<cmd>lnext<CR>zz", {
-    desc = "Next location item",
+	desc = "Next location item",
 })
 
 vim.keymap.set("n", "<leader>k", "<cmd>lprev<CR>zz", {
-    desc = "Previous location item",
+	desc = "Previous location item",
 })
 
 -- ============================================================================
@@ -115,8 +122,8 @@ vim.keymap.set("n", "<leader>k", "<cmd>lprev<CR>zz", {
 
 -- Make current file executable
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", {
-    silent = true,
-    desc = "Make file executable",
+	silent = true,
+	desc = "Make file executable",
 })
 
 -- ============================================================================
@@ -125,6 +132,6 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", {
 
 -- Source init.lua to reload configuration
 vim.keymap.set("n", "<leader><CR>", function()
-    print("Sourcing init.lua")
-    vim.cmd("luafile ~/.config/nvim/init.lua")
+	print("Sourcing init.lua")
+	vim.cmd("luafile ~/.config/nvim/init.lua")
 end, { desc = "Reload Neovim config" })

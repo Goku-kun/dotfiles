@@ -42,10 +42,22 @@ install_nvim_debian: setup_nvim
 	cd neovim && make CMAKE_BUILD_TYPE=Release
 	cd neovim && make install
 	nvim --version
-install_nvim_mac: setup_nvim
+install_nvim_deps_mac:
+	@echo "Installing Neovim runtime dependencies via Homebrew..."
+	# tree-sitter-cli is REQUIRED by nvim-treesitter main branch to compile parsers.
+	# Note: install `tree-sitter-cli`, NOT `tree-sitter` (the latter is just the C library).
+	brew install tree-sitter-cli
+	# Used by telescope, live_grep, fuzzy finding
+	brew install ripgrep fd
+	# Runtimes that mason-installed LSPs need
+	brew install node python rustup
+	@echo "Done. Run 'rustup default stable' once if you haven't initialized rustup yet."
+install_nvim_mac: setup_nvim install_nvim_deps_mac
 	@echo "Installing Neovim via Homebrew..."
 	brew install neovim
 	nvim --version
+	@echo "On first launch, lazy.nvim will install plugins from lazy-lock.json,"
+	@echo "mason will install LSPs, and nvim-treesitter will compile parsers."
 install_alacritty_mac: setup_alacritty
 	@echo "Installing Alacritty via Homebrew..."
 	# go to alacritty github page to get the latest installation instructions

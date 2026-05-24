@@ -57,8 +57,8 @@ cmp.setup({
 
 	-- Completion sources (order matters - higher priority first)
 	sources = cmp.config.sources({
-		{ name = "luasnip", priority = 1000 }, -- Snippet completions (highest)
-		{ name = "nvim_lsp", priority = 900 }, -- LSP completions
+		{ name = "nvim_lsp", priority = 1000 }, -- LSP completions
+		{ name = "luasnip", priority = 900 }, -- Snippet completions (highest)
 		{ name = "nvim_lua", priority = 800 }, -- Neovim Lua API completions
 		{ name = "path", priority = 700 }, -- File path completions
 	}, {
