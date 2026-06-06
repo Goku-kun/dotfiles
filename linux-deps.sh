@@ -143,6 +143,29 @@ install_rustup() {
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 }
 
+install_nvm() {
+  if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+    log "nvm already installed at ~/.nvm; skipping installer"
+  else
+    log "installing nvm v0.40.4"
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+  fi
+
+  # Load nvm into this shell so subsequent steps can call it. The installer
+  # has already appended source lines to ~/.bashrc / ~/.zshrc for future shells.
+  export NVM_DIR="$HOME/.nvm"
+  # shellcheck disable=SC1091
+  [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+
+  if command -v nvm >/dev/null 2>&1; then
+    log "installing latest LTS node via nvm"
+    nvm install --lts
+    nvm use --lts >/dev/null
+  else
+    warn "nvm not on PATH after install — open a new shell and re-run if Node is missing"
+  fi
+}
+
 install_tree_sitter_cli() {
   [[ "$PM" == pacman ]] && return 0   # arch installs via pacman above
   if command -v tree-sitter >/dev/null 2>&1; then
@@ -161,9 +184,6 @@ print_hints() {
   cat <<'EOF'
 
 Not installed automatically (intentional):
-  - nvm (per-user, opinionated). Install with:
-      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.5/install.sh | bash
-      nvm install --lts
   - Terminal emulators (kitty / alacritty / ghostty). Distro coverage
     is uneven, especially ghostty. Install via your package manager
     or vendor instructions.
@@ -188,6 +208,7 @@ main() {
   install_neovim_tarball
   install_fd_shim
   install_rustup
+  install_nvm
   install_tree_sitter_cli
   print_hints
 }
