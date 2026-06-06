@@ -23,8 +23,9 @@ ls.setup({
 	-- Update dynamic snippets as you type
 	updateevents = "TextChanged,TextChangedI",
 
-	-- Enable autosnippets (snippets that expand without trigger)
-	enable_autosnippets = true,
+	-- Autosnippets disabled: no autosnippets are currently defined, and the
+	-- flag enlarges the surface for accidental expansion mid-edit.
+	enable_autosnippets = false,
 
 	-- Highlight configuration for visual feedback
 	ext_opts = {
@@ -49,12 +50,15 @@ ls.setup({
 -- KEYBINDINGS
 -- ============================================================================
 
--- Jump forward in snippet (<C-j> in insert/select mode)
+-- Jump forward in snippet (<C-j> in insert/select mode).
+-- Jump-only: never expand. Avoids accidental expansion when editing a variable
+-- whose name matches a snippet trigger (e.g. `imp`, `cl`, `type`, `Type`).
+-- Snippet expansion is handled by blink.cmp's accept (<CR> / <C-y>).
 vim.keymap.set({ "i", "s" }, "<C-j>", function()
-	if ls.expand_or_jumpable() then
-		ls.expand_or_jump()
+	if ls.jumpable(1) then
+		ls.jump(1)
 	end
-end, { silent = true, desc = "LuaSnip: Expand or jump forward" })
+end, { silent = true, desc = "LuaSnip: Jump forward" })
 
 -- Jump backward in snippet (<C-k> in insert/select mode)
 vim.keymap.set({ "i", "s" }, "<C-k>", function()

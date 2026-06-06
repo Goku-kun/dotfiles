@@ -218,6 +218,25 @@ const {} = async ({}) => {{
 		)
 	),
 
+	-- Exported async function: name -> param -> paramType -> returnType -> body (<C-j>)
+	s(
+		"eaf",
+		fmt(
+			[[
+export async function {}({}: {}): {} {{
+  {}
+}}
+]],
+			{
+				i(1, "name"),
+				i(2, "param"),
+				i(3, "ParamType"),
+				i(4, "Promise<void>"),
+				i(5, "// body"),
+			}
+		)
+	),
+
 	-- Console log
 	s("cl", fmt("console.log({})", { i(1, "value") })),
 

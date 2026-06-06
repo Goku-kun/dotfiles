@@ -18,111 +18,21 @@
 
 require("mason").setup({})
 
--- Automatically install language servers when needed
+-- Automatically install language servers when needed.
+-- mason-lspconfig v2 replaced `automatic_installation` with `automatic_enable`.
+-- Listing servers explicitly avoids auto-attaching every installed Mason package
+-- (e.g. emmet_ls, graphql) to TS/TSX buffers.
 require("mason-lspconfig").setup({
 	ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
-	automatic_installation = true,
+	automatic_enable = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
 })
 
 -- ============================================================================
--- COMPLETION SETUP - nvim-cmp Configuration
+-- COMPLETION ENGINE
 -- ============================================================================
-
-local cmp = require("cmp")
-local luasnip = require("luasnip")
-
--- Note: LuaSnip is now configured in after/plugin/luasnip.lua
--- We only need cmp integration here
-
-cmp.setup({
-	snippet = {
-		expand = function(args)
-			luasnip.lsp_expand(args.body)
-		end,
-	},
-
-	-- Keybindings for completion menu
-	mapping = cmp.mapping.preset.insert({
-		["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-		["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-		["<C-y>"] = cmp.mapping.confirm({ select = true }),
-		["<C-Space>"] = cmp.mapping.complete(),
-		["<C-b>"] = cmp.mapping.scroll_docs(-4),
-		["<C-f>"] = cmp.mapping.scroll_docs(4),
-		["<C-e>"] = cmp.mapping.abort(),
-		-- Tab is reserved for Copilot
-		["<Tab>"] = nil,
-		["<S-Tab>"] = nil,
-	}),
-
-	-- Completion sources (order matters - higher priority first)
-	sources = cmp.config.sources({
-		{ name = "nvim_lsp", priority = 1000 }, -- LSP completions
-		{ name = "luasnip", priority = 900 }, -- Snippet completions (highest)
-		{ name = "nvim_lua", priority = 800 }, -- Neovim Lua API completions
-		{ name = "path", priority = 700 }, -- File path completions
-	}, {
-		{ name = "buffer", keyword_length = 3, priority = 500 }, -- Buffer completions
-	}),
-
-	-- Completion menu appearance
-	window = {
-		completion = cmp.config.window.bordered(),
-		documentation = cmp.config.window.bordered(),
-	},
-
-	-- Formatting of completion items
-	formatting = {
-		fields = { "kind", "abbr", "menu" },
-		format = function(entry, vim_item)
-			-- Kind icons (optional - you can customize these)
-			local kind_icons = {
-				Text = "",
-				Method = "󰆧",
-				Function = "󰊕",
-				Constructor = "",
-				Field = "󰇽",
-				Variable = "󰂡",
-				Class = "󰠱",
-				Interface = "",
-				Module = "",
-				Property = "󰜢",
-				Unit = "",
-				Value = "󰎠",
-				Enum = "",
-				Keyword = "󰌋",
-				Snippet = "",
-				Color = "󰏘",
-				File = "󰈙",
-				Reference = "",
-				Folder = "󰉋",
-				EnumMember = "",
-				Constant = "󰏿",
-				Struct = "",
-				Event = "",
-				Operator = "󰆕",
-				TypeParameter = "󰅲",
-			}
-
-			vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind] or "", vim_item.kind)
-
-			vim_item.menu = ({
-				nvim_lsp = "[LSP]",
-				nvim_lua = "[Lua]",
-				luasnip = "[Snip]",
-				buffer = "[Buf]",
-				path = "[Path]",
-			})[entry.source.name]
-
-			return vim_item
-		end,
-	},
-
-	-- Experimental features
-	experimental = {
-		ghost_text = false, -- Conflicts with Copilot
-	},
-})
+-- Configured via blink.cmp's `opts` in lua/gkun/lazy.lua. No setup needed here.
+-- LSP capabilities are advertised below via blink.cmp's helper.
+-- ============================================================================
 
 -- ============================================================================
 -- LSP KEYBINDINGS - Using LspAttach autocommand (Neovim 0.11+ recommended)
@@ -181,11 +91,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.diagnostic.open_float,
 			vim.tbl_extend("force", opts, { desc = "Line diagnostics" })
 		)
-		vim.keymap.set("n", "[d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+		-- `float = true` restores the popup that `goto_next`/`goto_prev` used to
+		-- show by default; `vim.diagnostic.jump` defaults `float` to false.
+		vim.keymap.set("n", "[d", function()
+			vim.diagnostic.jump({ count = 1, float = true })
+		end, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 		vim.keymap.set(
 			"n",
 			"]d",
-			vim.diagnostic.goto_prev,
+			function()
+				vim.diagnostic.jump({ count = -1, float = true })
+			end,
 			vim.tbl_extend("force", opts, { desc = "Previous diagnostic" })
 		)
 
@@ -245,8 +161,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- LSP SERVER CONFIGURATIONS - Native Neovim 0.11 API
 -- ============================================================================
 
--- Get default capabilities from nvim-cmp
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
+-- Get default capabilities from blink.cmp (replaces cmp_nvim_lsp on Neovim 0.12+)
+local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 -- Lua Language Server (for Neovim config)
 vim.lsp.config("lua_ls", {
@@ -410,14 +326,14 @@ null_ls.setup({
 	},
 	on_attach = function(client, bufnr)
 		-- Format on Ctrl-S in insert mode
-		if client.supports_method("textDocument/formatting") then
+		if client:supports_method("textDocument/formatting", { bufnr = bufnr }) then
 			vim.keymap.set("i", "<C-s>", function()
 				vim.lsp.buf.format({ bufnr = bufnr })
 			end, { buffer = bufnr, desc = "Format file" })
 		end
 
 		-- Format visual selection
-		if client.supports_method("textDocument/rangeFormatting") then
+		if client:supports_method("textDocument/rangeFormatting", { bufnr = bufnr }) then
 			vim.keymap.set("x", "<Leader>f", function()
 				vim.lsp.buf.format({ bufnr = bufnr })
 			end, { buffer = bufnr, desc = "Format selection" })

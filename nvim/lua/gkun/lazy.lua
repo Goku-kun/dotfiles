@@ -25,7 +25,11 @@ require("lazy").setup({
 	{
 		"nvim-telescope/telescope.nvim",
 		cmd = "Telescope",
-		tag = "0.1.8",
+		-- Track master: tag 0.1.8 (and v0.1.9) call the removed
+		-- `nvim-treesitter.parsers.ft_to_lang`, which was dropped by the
+		-- nvim-treesitter main-branch rewrite. Master replaced that call
+		-- with `vim.treesitter.language.get_lang` + `add` + `start`.
+		branch = "master",
 		keys = {
 			{ "<leader>ff", desc = "Find files" },
 			{ "<leader>fg", desc = "Live grep" },
@@ -107,6 +111,159 @@ require("lazy").setup({
 			"MunifTanjim/nui.nvim",
 		},
 		cmd = "Neotree",
+	},
+
+	-- used with neo-tree
+	{
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false,
+		opts = {
+			-- your configuration comes here
+			-- or leave it empty to use the default settings
+			-- refer to the configuration section below
+			bigfile = { enabled = true },
+			-- dashboard = { enabled = true },
+			-- explorer = { enabled = true },
+			indent = { enabled = true },
+			-- input = { enabled = true },
+			picker = { enabled = true },
+			notifier = { enabled = true },
+			-- quickfile = { enabled = true },
+			scope = { enabled = true },
+			-- scroll = { enabled = true },
+			-- statuscolumn = { enabled = true },
+			-- words = { enabled = true },
+
+			---@class snacks.image.Config
+			---@field enabled? boolean enable image viewer
+			---@field wo? vim.wo|{} options for windows showing the image
+			---@field bo? vim.bo|{} options for the image buffer
+			---@field formats? string[]
+			--- Resolves a reference to an image with src in a file (currently markdown only).
+			--- Return the absolute path or url to the image.
+			--- When `nil`, the path is resolved relative to the file.
+			---@field resolve? fun(file: string, src: string): string?
+			---@field convert? snacks.image.convert.Config
+			image = {
+				enabled = false,
+				formats = {
+					"png",
+					"jpg",
+					"jpeg",
+					"gif",
+					"bmp",
+					"webp",
+					"tiff",
+					"heic",
+					"avif",
+					"mp4",
+					"mov",
+					"avi",
+					"mkv",
+					"webm",
+					"pdf",
+					"icns",
+				},
+				force = false, -- try displaying the image, even if the terminal does not support it
+				doc = {
+					-- enable image viewer for documents
+					-- a treesitter parser must be available for the enabled languages.
+					enabled = true,
+					-- render the image inline in the buffer
+					-- if your env doesn't support unicode placeholders, this will be disabled
+					-- takes precedence over `opts.float` on supported terminals
+					inline = true,
+					-- render the image in a floating window
+					-- only used if `opts.inline` is disabled
+					float = true,
+					max_width = 80,
+					max_height = 40,
+					-- Set to `true`, to conceal the image text when rendering inline.
+					-- (experimental)
+					---@param lang string tree-sitter language
+					---@param type snacks.image.Type image type
+					conceal = function(lang, type)
+						-- only conceal math expressions
+						return type == "math"
+					end,
+				},
+				img_dirs = { "img", "images", "assets", "static", "public", "media", "attachments" },
+				-- window options applied to windows displaying image buffers
+				-- an image buffer is a buffer with `filetype=image`
+				wo = {
+					wrap = false,
+					number = false,
+					relativenumber = false,
+					cursorcolumn = false,
+					signcolumn = "no",
+					foldcolumn = "0",
+					list = false,
+					spell = false,
+					statuscolumn = "",
+				},
+				cache = vim.fn.stdpath("cache") .. "/snacks/image",
+				debug = {
+					request = false,
+					convert = false,
+					placement = false,
+				},
+				env = {},
+				-- icons used to show where an inline image is located that is
+				-- rendered below the text.
+				icons = {
+					math = "󰪚 ",
+					chart = "󰄧 ",
+					image = " ",
+				},
+				---@class snacks.image.convert.Config
+				convert = {
+					notify = false, -- show a notification on error
+					---@type snacks.image.args
+					mermaid = function()
+						local theme = vim.o.background == "light" and "neutral" or "dark"
+						return { "-i", "{src}", "-o", "{file}", "-b", "transparent", "-t", theme, "-s", "{scale}" }
+					end,
+					---@type table<string,snacks.image.args>
+					magick = {
+						default = { "{src}[0]", "-scale", "1920x1080>" }, -- default for raster images
+						vector = { "-density", 192, "{src}[{page}]" }, -- used by vector images like svg
+						math = { "-density", 192, "{src}[{page}]", "-trim" },
+						pdf = { "-density", 192, "{src}[{page}]", "-background", "white", "-alpha", "remove", "-trim" },
+					},
+				},
+				math = {
+					enabled = true, -- enable math expression rendering
+					-- in the templates below, `${header}` comes from any section in your document,
+					-- between a start/end header comment. Comment syntax is language-specific.
+					-- * start comment: `// snacks: header start`
+					-- * end comment:   `// snacks: header end`
+					typst = {
+						tpl = [[
+        #set page(width: auto, height: auto, margin: (x: 2pt, y: 2pt))
+        #show math.equation.where(block: false): set text(top-edge: "bounds", bottom-edge: "bounds")
+        #set text(size: 12pt, fill: rgb("${color}"))
+        ${header}
+        ${content}]],
+					},
+					latex = {
+						font_size = "Large", -- see https://www.sascha-frank.com/latex-font-size.html
+						-- for latex documents, the doc packages are included automatically,
+						-- but you can add more packages here. Useful for markdown documents.
+						packages = { "amsmath", "amssymb", "amsfonts", "amscd", "mathtools" },
+						tpl = [[
+        \documentclass[preview,border=0pt,varwidth,12pt]{standalone}
+        \usepackage{${packages}}
+        \begin{document}
+        ${header}
+        { \${font_size} \selectfont
+          \color[HTML]{${color}}
+        ${content}}
+        \end{document}]],
+					},
+				},
+			},
+		},
 	},
 
 	-- Bufferline - Show open buffers as tabs at the top
@@ -242,7 +399,7 @@ require("lazy").setup({
 
 	-- Indentation guide for treesitter
 	{ "lukas-reineke/indent-blankline.nvim" },
-	{ "https://codeberg.org/esensar/nvim-dev-container" },
+	-- { "https://codeberg.org/esensar/nvim-dev-container" },
 
 	-- smear cursor
 	-- {
@@ -279,14 +436,13 @@ require("lazy").setup({
 		opts = {},
 	},
 
-	-- LSP: Bridge between Mason and lspconfig
+	-- LSP: Bridge between Mason and lspconfig.
+	-- Setup is performed once in after/plugin/lsp.lua. Do NOT use `opts` here —
+	-- Lazy auto-calls setup with `opts`, which would fire before lsp.lua and
+	-- auto-enable every installed Mason server (emmet, graphql, biome, astro...).
 	{
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "williamboman/mason.nvim" },
-		opts = {
-			ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
-			automatic_installation = true,
-		},
 	},
 
 	-- LSP: Neovim LSP configuration
@@ -299,25 +455,23 @@ require("lazy").setup({
 		},
 	},
 
-	-- Completion engine
+	-- Completion engine (blink.cmp - replaces nvim-cmp on Neovim 0.12+)
 	{
-		"hrsh7th/nvim-cmp",
+		"saghen/blink.cmp",
+		dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip" },
+		version = "1.*",
 		event = "InsertEnter",
-		dependencies = {
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-buffer",
-			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-nvim-lua",
-			"saadparwaiz1/cmp_luasnip",
-			"rafamadriz/friendly-snippets",
+		opts = {
+			keymap = { preset = "default" },
+			snippets = { preset = "luasnip" },
+			sources = { default = { "lsp", "path", "snippets", "buffer" } },
+			fuzzy = { implementation = "prefer_rust_with_warning" },
+			completion = {
+				documentation = { auto_show = true, auto_show_delay_ms = 300 },
+			},
 		},
+		opts_extend = { "sources.default" },
 	},
-
-	-- Individual completion sources
-	{ "hrsh7th/cmp-nvim-lsp", lazy = true },
-	{ "hrsh7th/cmp-buffer", lazy = true },
-	{ "hrsh7th/cmp-path", lazy = true },
-	{ "hrsh7th/cmp-nvim-lua", lazy = true },
 
 	-- Snippet engine
 	{
@@ -326,7 +480,6 @@ require("lazy").setup({
 		lazy = true,
 		build = "make install_jsregexp",
 	},
-	{ "saadparwaiz1/cmp_luasnip", lazy = true },
 	{ "rafamadriz/friendly-snippets", lazy = true },
 
 	-- Formatting: none-ls and prettier
@@ -388,16 +541,6 @@ require("lazy").setup({
 	},
 
 	{ "JoosepAlviste/nvim-ts-context-commentstring" },
-
-	{
-		"olimorris/codecompanion.nvim",
-		opts = {},
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-treesitter/nvim-treesitter",
-			"ravitemer/mcphub.nvim",
-		},
-	},
 
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
