@@ -70,23 +70,23 @@ ZSH_THEME="awesomepanda"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting kubectl history emoji encode64 vi-mode z)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting kubectl history emoji encode64 vi-mode z tmux lol)
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-# export MANPATH="/usr/local/man:$MANPATH"
+export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='nvim'
-# else
-#   export EDITOR='nvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='nvim'
+else
+  export EDITOR='nvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -140,9 +140,6 @@ if [ -f '/Users/goku-kun/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Us
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/goku-kun/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/goku-kun/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
-# Postgres path
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-
 # setup for android studio for using with React Native development
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator
@@ -177,4 +174,24 @@ export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/3.4.0/bin:$P
 ## [/Completion]
 
 alias cat='bat --paging=never'
+# eval "$(fahhh hook zsh)"
 
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/terraform terraform
+
+# aws switch profile
+
+awsp() {
+      local profile
+      if [[ -n "$1" ]]; then
+          profile="$1"
+      else
+          profile=$(aws configure list-profiles | fzf --prompt="AWS profile> ")
+      fi
+      [[ -z "$profile" ]] && return
+      export AWS_PROFILE="$profile"
+      aws sts get-caller-identity
+}
+
+# Local-only overrides (real secrets, machine-specific tweaks). Not tracked.
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local

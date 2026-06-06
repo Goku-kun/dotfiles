@@ -1,0 +1,8 @@
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Backups created by install.sh
+*.backup.*
