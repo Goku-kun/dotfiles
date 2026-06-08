@@ -47,18 +47,22 @@ install_distro_packages() {
       install="sudo apt install -y"
       # libclang-dev + pkg-config are needed by bindgen (used by rquickjs,
       # a transitive dep of tree-sitter-cli) when building via cargo.
-      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux build-essential libclang-dev pkg-config curl git xz-utils ca-certificates)
+      # xclip + wl-clipboard cover X11 + Wayland clipboard providers
+      # Neovim's :checkhealth provider expects.
+      # xdg-utils, unzip, wget: needed by mason, gx/vim.ui.open, plugins.
+      # python3-pynvim: the Python remote-plugin provider Neovim asks for.
+      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip python3-pynvim tmux build-essential libclang-dev pkg-config xclip wl-clipboard xdg-utils unzip wget curl git xz-utils ca-certificates)
       ;;
     dnf)
       update="sudo dnf check-update || true"
       install="sudo dnf install -y"
-      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux gcc make clang-devel pkgconfig curl git xz ca-certificates)
+      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip python3-neovim tmux gcc make clang-devel pkgconfig xclip wl-clipboard xdg-utils unzip wget curl git xz ca-certificates)
       ;;
     pacman)
       update="sudo pacman -Sy"
       install="sudo pacman -S --noconfirm --needed"
       # Arch's neovim and tree-sitter-cli are current; install here.
-      pkgs=(neovim tree-sitter-cli ripgrep fd nodejs npm python python-pip tmux base-devel clang pkgconf curl git ca-certificates)
+      pkgs=(neovim tree-sitter-cli ripgrep fd nodejs npm python python-pip python-pynvim tmux base-devel clang pkgconf xclip wl-clipboard xdg-utils unzip wget curl git ca-certificates)
       ;;
   esac
 
@@ -168,6 +172,22 @@ install_nvm() {
   fi
 }
 
+install_node_provider() {
+  # The Neovim Node provider (`:checkhealth provider`) wants the `neovim`
+  # npm package globally installed under whichever node is on PATH.
+  # install_nvm has already run, so this lands under nvm's node.
+  if ! command -v npm >/dev/null 2>&1; then
+    warn "npm missing; skipping Neovim Node provider install"
+    return 0
+  fi
+  if npm ls -g --depth=0 neovim >/dev/null 2>&1; then
+    log "Neovim Node provider already installed; skipping"
+    return 0
+  fi
+  log "installing Neovim Node provider (npm i -g neovim)"
+  npm install -g neovim
+}
+
 install_tree_sitter_cli() {
   [[ "$PM" == pacman ]] && return 0   # arch installs via pacman above
   if command -v tree-sitter >/dev/null 2>&1; then
@@ -225,6 +245,7 @@ main() {
   install_fd_shim
   install_rustup
   install_nvm
+  install_node_provider
   install_tree_sitter_cli
   print_hints
 }
