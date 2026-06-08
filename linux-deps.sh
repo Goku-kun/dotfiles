@@ -45,18 +45,20 @@ install_distro_packages() {
     apt)
       update="sudo apt update"
       install="sudo apt install -y"
-      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux build-essential curl git xz-utils ca-certificates)
+      # libclang-dev + pkg-config are needed by bindgen (used by rquickjs,
+      # a transitive dep of tree-sitter-cli) when building via cargo.
+      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux build-essential libclang-dev pkg-config curl git xz-utils ca-certificates)
       ;;
     dnf)
       update="sudo dnf check-update || true"
       install="sudo dnf install -y"
-      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux gcc make curl git xz ca-certificates)
+      pkgs=(ripgrep fd-find nodejs npm python3 python3-pip tmux gcc make clang-devel pkgconfig curl git xz ca-certificates)
       ;;
     pacman)
       update="sudo pacman -Sy"
       install="sudo pacman -S --noconfirm --needed"
       # Arch's neovim and tree-sitter-cli are current; install here.
-      pkgs=(neovim tree-sitter-cli ripgrep fd nodejs npm python python-pip tmux base-devel curl git ca-certificates)
+      pkgs=(neovim tree-sitter-cli ripgrep fd nodejs npm python python-pip tmux base-devel clang pkgconf curl git ca-certificates)
       ;;
   esac
 
@@ -172,12 +174,26 @@ install_tree_sitter_cli() {
     log "tree-sitter CLI already on PATH; skipping"
     return 0
   fi
-  if ! command -v npm >/dev/null 2>&1; then
-    warn "npm missing; cannot install tree-sitter-cli automatically"
-    return 1
+
+  # Prefer cargo: builds against local glibc and avoids the prebuilt-binary
+  # GLIBC_2.39 mismatch that `npm install -g tree-sitter-cli` hits on
+  # Debian 12 / Ubuntu 22.04. libclang-dev (installed earlier) covers the
+  # bindgen build for the rquickjs transitive dep.
+  if command -v cargo >/dev/null 2>&1; then
+    log "installing tree-sitter-cli via cargo (builds from source)"
+    cargo install tree-sitter-cli
+    return 0
   fi
-  log "installing tree-sitter-cli via npm (-g)"
-  sudo npm install -g tree-sitter-cli
+
+  if command -v npm >/dev/null 2>&1; then
+    warn "cargo not on PATH; falling back to npm. The npm prebuilt binary"
+    warn "requires GLIBC 2.39+ and may fail on Debian 12 / Ubuntu 22.04."
+    sudo npm install -g tree-sitter-cli
+    return 0
+  fi
+
+  warn "neither cargo nor npm available; install tree-sitter-cli manually"
+  return 1
 }
 
 print_hints() {
