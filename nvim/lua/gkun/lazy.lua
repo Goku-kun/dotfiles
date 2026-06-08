@@ -544,7 +544,7 @@ require("lazy").setup({
 
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
-		ft = { "markdown", "codecompanion" },
+		ft = { "markdown" },
 	},
 	{
 		"echasnovski/mini.diff",
@@ -557,18 +557,7 @@ require("lazy").setup({
 		end,
 	},
 
-	{
-		"HakonHarnes/img-clip.nvim",
-		opts = {
-			filetypes = {
-				codecompanion = {
-					prompt_for_file_name = false,
-					template = "[Image]($FILE_PATH)",
-					use_absolute_path = true,
-				},
-			},
-		},
-	},
+	{ "HakonHarnes/img-clip.nvim" },
 	{ "brenoprata10/nvim-highlight-colors" },
 
 	checker = { enabled = true },
