@@ -6,3 +6,6 @@
 
 # Backups created by install.sh
 *.backup.*
+
+# Claude Code session state inside symlinked dirs
+.claude/
