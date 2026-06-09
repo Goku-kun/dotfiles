@@ -13,6 +13,8 @@ Symlinks `~/.config/<pkg>` dirs, `~/.zshrc`, and `~/.tmux.conf.local` to this re
 | `zsh/.zshrc`                 | `~/.zshrc`            |
 | `tmux-conf/.tmux.conf.local` | `~/.tmux.conf.local`  |
 
+`install.sh` also clones gpakosz [Oh my tmux!](https://github.com/gpakosz/.tmux) into `~/.tmux` and links `~/.tmux.conf` to it. That upstream isn't tracked here, only `tmux-conf/.tmux.conf.local` (my customizations) is.
+
 Plus `Brewfile` (macOS deps), `linux-deps.sh` (apt/dnf/pacman deps), `install.sh`, and `legacy/` (old configs I keep around but don't install).
 
 ## Quick start
@@ -38,6 +40,8 @@ Safe to re-run; paths already pointing at the repo are skipped.
 ## After install
 
 Open `nvim` once. lazy.nvim pulls plugins from `nvim/lazy-lock.json`, mason fetches LSP servers, nvim-treesitter compiles parsers (needs `tree-sitter` on PATH, which the Brewfile installs).
+
+Start `tmux` once. gpakosz's config auto-installs tpm and the plugins listed in `.tmux.conf.local` (copycat, cpu, resurrect, continuum) on first launch. To update the upstream later: `git -C ~/.tmux pull`.
 
 ## Editing config
 

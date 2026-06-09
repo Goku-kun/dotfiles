@@ -63,6 +63,35 @@ link kitty      .config/kitty
 link zsh/.zshrc           .zshrc
 link tmux-conf/.tmux.conf.local .tmux.conf.local
 
+# tmux: gpakosz "Oh my tmux!" upstream lives in ~/.tmux (not tracked in this
+# repo). Clone it and symlink ~/.tmux.conf -> ~/.tmux/.tmux.conf. Our own
+# customizations stay in ~/.tmux.conf.local (linked above).
+setup_tmux() {
+  local tmux_dir="$HOME/.tmux"
+  local conf="$HOME/.tmux.conf"
+
+  if [[ -d "$tmux_dir" ]]; then
+    log "~/.tmux already present (update with: git -C ~/.tmux pull)"
+  else
+    log "cloning gpakosz/.tmux into ~/.tmux"
+    if ! git clone --depth 1 https://github.com/gpakosz/.tmux.git "$tmux_dir"; then
+      warn "failed to clone gpakosz/.tmux — set up tmux manually"
+      return
+    fi
+  fi
+
+  # ~/.tmux.conf must point outside the repo, so link() can't be reused.
+  if [[ ! -L "$conf" && -e "$conf" ]]; then
+    local backup="${conf}.backup.${TS}"
+    warn ".tmux.conf exists, backing up to $(basename "$backup")"
+    mv "$conf" "$backup"
+  fi
+  ln -sfn "$tmux_dir/.tmux.conf" "$conf"
+  log "linked .tmux.conf -> .tmux/.tmux.conf"
+}
+
+setup_tmux
+
 # Platform-specific dependency install
 case "$(uname -s)" in
   Darwin)
