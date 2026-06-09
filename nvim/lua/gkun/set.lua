@@ -36,6 +36,29 @@ vim.opt.shiftwidth = 4     -- Indent width is 4 spaces
 vim.opt.expandtab = true   -- Convert tabs to spaces
 vim.opt.smartindent = true -- Smart auto-indenting
 
+-- Web filetypes use 2-space indent (Prettier default, React/TS convention).
+-- Treesitter returns nesting depth and Vim multiplies it by shiftwidth; with
+-- shiftwidth=4 every newline in tsx lands at twice the depth of the
+-- surrounding code, which always reads as over-indented.
+local web_indent_group = vim.api.nvim_create_augroup("WebIndent", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    group = web_indent_group,
+    pattern = {
+        "javascript", "javascriptreact",
+        "typescript", "typescriptreact",
+        "json", "jsonc",
+        "html", "css", "scss",
+        "yaml", "markdown",
+        "svelte", "vue",
+    },
+    callback = function()
+        vim.opt_local.tabstop = 2
+        vim.opt_local.softtabstop = 2
+        vim.opt_local.shiftwidth = 2
+    end,
+    desc = "2-space indent for web filetypes",
+})
+
 -- ============================================================================
 -- CLIPBOARD
 -- ============================================================================
