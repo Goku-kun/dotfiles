@@ -18,13 +18,29 @@
 
 require("mason").setup({})
 
--- Automatically install language servers when needed.
--- mason-lspconfig v2 replaced `automatic_installation` with `automatic_enable`.
--- Listing servers explicitly avoids auto-attaching every installed Mason package
--- (e.g. emmet_ls, graphql) to TS/TSX buffers.
+-- mason-lspconfig v2: `automatic_enable` (default true) calls vim.lsp.enable()
+-- for every installed server, so installing one via :Mason "just works" with no
+-- per-server code here. We only exclude servers we don't want auto-attaching
+-- (emmet_ls/graphql would otherwise latch onto TS/TSX buffers). Custom settings
+-- still live in vim.lsp.config() below and merge with nvim-lspconfig defaults.
 require("mason-lspconfig").setup({
-	ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
-	automatic_enable = { "lua_ls", "ts_ls", "rust_analyzer", "eslint" },
+	-- Servers installed on a fresh machine. Anything else installed via :Mason
+	-- is still auto-enabled by automatic_enable. dartls is intentionally absent
+	-- (it uses the system `dart`, not a Mason package).
+	ensure_installed = {
+		"lua_ls",
+		"ts_ls",
+		"rust_analyzer",
+		"eslint",
+		"bashls",
+		"taplo",
+		"clangd",
+		"marksman",
+		"pyright",
+		"cssls",
+		"dockerls",
+	},
+	automatic_enable = { exclude = { "emmet_ls", "graphql" } },
 })
 
 -- ============================================================================
@@ -161,12 +177,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- LSP SERVER CONFIGURATIONS - Native Neovim 0.11 API
 -- ============================================================================
 
--- Get default capabilities from blink.cmp (replaces cmp_nvim_lsp on Neovim 0.12+)
-local capabilities = require("blink.cmp").get_lsp_capabilities()
+-- Apply blink.cmp completion capabilities to EVERY server once. The "*" config
+-- is merged into every resolved server config by Neovim's native LSP, so no
+-- per-server `capabilities =` lines are needed.
+vim.lsp.config("*", {
+	capabilities = require("blink.cmp").get_lsp_capabilities(),
+})
+
+-- Only servers that need custom settings get a block here. Everything else
+-- (ts_ls, eslint, clangd, marksman, pyright, taplo, bashls, dockerls, ...) is
+-- enabled automatically by mason-lspconfig with nvim-lspconfig's defaults.
 
 -- Lua Language Server (for Neovim config)
 vim.lsp.config("lua_ls", {
-	capabilities = capabilities,
 	settings = {
 		Lua = {
 			runtime = {
@@ -186,27 +209,8 @@ vim.lsp.config("lua_ls", {
 	},
 })
 
--- TypeScript/JavaScript Language Server
-vim.lsp.config("ts_ls", {
-	capabilities = capabilities,
-	filetypes = {
-		"javascript",
-		"javascriptreact",
-		"javascript.jsx",
-		"typescript",
-		"typescriptreact",
-		"typescript.tsx",
-	},
-})
-
--- ESLint Language Server
-vim.lsp.config("eslint", {
-	capabilities = capabilities,
-})
-
 -- Rust Analyzer
 vim.lsp.config("rust_analyzer", {
-	capabilities = capabilities,
 	settings = {
 		["rust-analyzer"] = {
 			checkOnSave = {
@@ -216,27 +220,8 @@ vim.lsp.config("rust_analyzer", {
 	},
 })
 
--- C/C++ Language Server (clangd)
-vim.lsp.config("clangd", {
-	capabilities = capabilities,
-	filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-})
-
--- Markdown Language Server
-vim.lsp.config("marksman", {
-	capabilities = capabilities,
-	filetypes = { "markdown" },
-})
-
--- Python Language Server
-vim.lsp.config("pyright", {
-	capabilities = capabilities,
-	filetypes = { "python" },
-})
-
 -- CSS Language Server
 vim.lsp.config("cssls", {
-	capabilities = capabilities,
 	settings = {
 		css = {
 			lint = {
@@ -246,25 +231,10 @@ vim.lsp.config("cssls", {
 	},
 })
 
--- TOML/YAML Language Server
-vim.lsp.config("taplo", {
-	capabilities = capabilities,
-	filetypes = { "toml" },
-})
-
--- Docker Language Server
-vim.lsp.config("dockerls", {
-	capabilities = capabilities,
-})
-
--- Dockerfile Language Server
-vim.lsp.config("docker_compose_language_service", {
-	capabilities = capabilities,
-})
-
--- Dart Language Server (supports Dart and Flutter projects)
+-- Dart Language Server (supports Dart and Flutter projects). dartls uses the
+-- system `dart`, not a Mason package, so mason-lspconfig won't auto-enable it;
+-- it needs the explicit vim.lsp.enable() below.
 vim.lsp.config("dartls", {
-	capabilities = capabilities,
 	cmd = { "dart", "language-server", "--protocol=lsp" },
 	filetypes = { "dart" },
 	init_options = {
@@ -285,19 +255,8 @@ vim.lsp.config("dartls", {
 -- ============================================================================
 -- ENABLE LSP SERVERS
 -- ============================================================================
--- Neovim 0.11+ requires explicitly enabling servers after configuration
-
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("ts_ls")
-vim.lsp.enable("eslint")
-vim.lsp.enable("rust_analyzer")
-vim.lsp.enable("clangd")
-vim.lsp.enable("marksman")
-vim.lsp.enable("pyright")
-vim.lsp.enable("cssls")
-vim.lsp.enable("taplo")
-vim.lsp.enable("dockerls")
-vim.lsp.enable("docker_compose_language_service")
+-- Mason-installed servers are auto-enabled by mason-lspconfig's automatic_enable.
+-- Only non-Mason servers need an explicit enable.
 vim.lsp.enable("dartls")
 
 -- ============================================================================

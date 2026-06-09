@@ -462,9 +462,19 @@ require("lazy").setup({
 		event = "InsertEnter",
 		opts = {
 			keymap = { preset = "default" },
-			snippets = { preset = "luasnip" },
+			-- Default snippets.score_offset is -3 which, with the -1 provider
+			-- offset, drops snippets below buffer words (-3) -- so in buffers
+			-- with no LSP (e.g. gitcommit) buffer text wins. Raise to 0 so
+			-- snippets rank above buffer, still below LSP (0) and path (3).
+			snippets = { preset = "luasnip", score_offset = 0 },
 			sources = { default = { "lsp", "path", "snippets", "buffer" } },
-			fuzzy = { implementation = "prefer_rust_with_warning" },
+			fuzzy = {
+				implementation = "prefer_rust_with_warning",
+				-- Default is { "score", "sort_text" }. Add "exact" first so literal
+				-- prefix matches win, keep blink's fuzzy "score" primary, then fall
+				-- back to the LSP server's sortText, then label as a tiebreaker.
+				sorts = { "exact", "score", "sort_text", "label" },
+			},
 			completion = {
 				documentation = { auto_show = true, auto_show_delay_ms = 300 },
 			},
