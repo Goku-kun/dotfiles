@@ -70,8 +70,15 @@ setup_tmux() {
   local tmux_dir="$HOME/.tmux"
   local conf="$HOME/.tmux.conf"
 
-  if [[ -d "$tmux_dir" ]]; then
+  # A bare directory check isn't enough: tpm also claims ~/.tmux (plugins
+  # live in ~/.tmux/plugins), so require the gpakosz conf itself before
+  # linking — otherwise ~/.tmux.conf ends up a dangling symlink.
+  if [[ -f "$tmux_dir/.tmux.conf" ]]; then
     log "~/.tmux already present (update with: git -C ~/.tmux pull)"
+  elif [[ -e "$tmux_dir" ]]; then
+    warn "~/.tmux exists but is not gpakosz/.tmux (no .tmux.conf inside)"
+    warn "move its contents aside (e.g. ~/.tmux/plugins), clone gpakosz/.tmux into ~/.tmux, then move them back"
+    return
   else
     log "cloning gpakosz/.tmux into ~/.tmux"
     if ! git clone --depth 1 https://github.com/gpakosz/.tmux.git "$tmux_dir"; then
