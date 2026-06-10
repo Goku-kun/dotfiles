@@ -37,6 +37,13 @@ Safe to re-run; paths already pointing at the repo are skipped.
     echo 'export OLLAMA_API_KEY=...' >> ~/.zshrc.local
     chmod 600 ~/.zshrc.local
 
+## Fonts
+
+The terminal font (Dank Mono, patched so kitty's monospace matcher accepts it and with a heavier bold) lives in a separate private repo, since it's a paid font that can't be published here:
+
+    git clone git@github.com:Goku-kun/dotfiles-fonts.git
+    cd dotfiles-fonts && ./install.sh
+
 ## After install
 
 Open `nvim` once. lazy.nvim pulls plugins from `nvim/lazy-lock.json`, mason fetches LSP servers, nvim-treesitter compiles parsers (needs `tree-sitter` on PATH, which the Brewfile installs).
